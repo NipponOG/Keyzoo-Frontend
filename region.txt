@@ -1,0 +1,203 @@
+ID
+Region Name
+1
+
+Europe
+
+2
+
+United States
+
+3
+
+Global
+
+7
+
+Russia
+
+8
+
+United Kingdom
+
+9
+
+China
+
+10
+
+RoW (Rest of World)
+
+11
+
+Latin America
+
+12
+
+Asia
+
+13
+
+Germany
+
+14
+
+Australia
+
+15
+
+Brazil
+
+16
+
+India
+
+17
+
+Japan
+
+18
+
+North America
+
+19
+
+Poland
+
+21
+
+Turkey
+
+22
+
+Hong Kong
+
+23
+
+Taiwan
+
+24
+
+Vietnam
+
+25
+
+Thailand
+
+26
+
+South Korea
+
+27
+
+Argentina
+
+28
+
+Canada
+
+29
+
+Denmark
+
+30
+
+Sweden
+
+
+
+
+<div class="sc-1e341797-2 eHAmuB">
+                    <div class="sc-c46e5164-23 fCzDDc">
+                        <div class="sc-c46e5164-25 jZMdJd">
+                            <div class="sc-c46e5164-24 fLEZPc">
+                                <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                    {/* <img alt="psn" sizes="100vw" srcset="https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 640w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 750w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 828w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 1080w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 1200w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 1920w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 2048w, https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg 3840w" src="https://driffle.com/icons/newsletter-section/newsletter-delight-psn.svg" decoding="async" data-nimg="fill" style={{position: 'absolute', inset: '0px', boxSizing: 'border-box', padding: '0px', border: 'none', margin: 'auto', display: 'block', width: '0px', height: '0px', minWidth: '100%', maxWidth: '100%', minHeight: '100%', maxHeight: '100%', objectFit: 'contain',}} /> */}
+                                    <img src={'/brands/psn.svg'}/>                                </span>
+                            </div>
+                            <div class="sc-c46e5164-24 fLEZPc">
+                                <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                    {/* <img alt="netflix" sizes="100vw" srcset="/icons/newsletter-section/nd-netflix.svg 640w, /icons/newsletter-section/nd-netflix.svg 750w, /icons/newsletter-section/nd-netflix.svg 828w, /icons/newsletter-section/nd-netflix.svg 1080w, /icons/newsletter-section/nd-netflix.svg 1200w, /icons/newsletter-section/nd-netflix.svg 1920w, /icons/newsletter-section/nd-netflix.svg 2048w, /icons/newsletter-section/nd-netflix.svg 3840w" src="/icons/newsletter-section/nd-netflix.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                </span>
+                            </div>
+                            <div class="sc-c46e5164-28 dXonOA">
+                                <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                    {/* <img alt="tinder" sizes="100vw" srcset="/icons/newsletter-section/nd-tinder.svg 640w, /icons/newsletter-section/nd-tinder.svg 750w, /icons/newsletter-section/nd-tinder.svg 828w, /icons/newsletter-section/nd-tinder.svg 1080w, /icons/newsletter-section/nd-tinder.svg 1200w, /icons/newsletter-section/nd-tinder.svg 1920w, /icons/newsletter-section/nd-tinder.svg 2048w, /icons/newsletter-section/nd-tinder.svg 3840w" src="/icons/newsletter-section/nd-tinder.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                </span>
+                            </div>
+                            <div class="sc-c46e5164-24 fLEZPc">
+                                <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                    {/* <img alt="hnm" sizes="100vw" srcset="/icons/newsletter-section/nd-hnm.svg 640w, /icons/newsletter-section/nd-hnm.svg 750w, /icons/newsletter-section/nd-hnm.svg 828w, /icons/newsletter-section/nd-hnm.svg 1080w, /icons/newsletter-section/nd-hnm.svg 1200w, /icons/newsletter-section/nd-hnm.svg 1920w, /icons/newsletter-section/nd-hnm.svg 2048w, /icons/newsletter-section/nd-hnm.svg 3840w" src="/icons/newsletter-section/nd-hnm.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                </span>
+                            </div>
+                        </div>
+                        <div style={{display: 'flex', gap: '10px',}}>
+                            <div>
+                                <div class="sc-c46e5164-26 jFfECc">
+                                    <div>
+                                        <div class="sc-c46e5164-24 fLEZPc">
+                                            <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                                {/* <img alt="airbnb" sizes="100vw" srcset="/icons/newsletter-section/nd-airbnb.svg 640w, /icons/newsletter-section/nd-airbnb.svg 750w, /icons/newsletter-section/nd-airbnb.svg 828w, /icons/newsletter-section/nd-airbnb.svg 1080w, /icons/newsletter-section/nd-airbnb.svg 1200w, /icons/newsletter-section/nd-airbnb.svg 1920w, /icons/newsletter-section/nd-airbnb.svg 2048w, /icons/newsletter-section/nd-airbnb.svg 3840w" src="/icons/newsletter-section/nd-airbnb.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                            </span>
+                                        </div>
+                                        <div class="sc-c46e5164-24 fLEZPc">
+                                            <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                                {/* <img alt="spotify" sizes="100vw" srcset="/icons/newsletter-section/nd-spotify.svg 640w, /icons/newsletter-section/nd-spotify.svg 750w, /icons/newsletter-section/nd-spotify.svg 828w, /icons/newsletter-section/nd-spotify.svg 1080w, /icons/newsletter-section/nd-spotify.svg 1200w, /icons/newsletter-section/nd-spotify.svg 1920w, /icons/newsletter-section/nd-spotify.svg 2048w, /icons/newsletter-section/nd-spotify.svg 3840w" src="/icons/newsletter-section/nd-spotify.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="sc-c46e5164-29 kGEJQZ">
+                                        <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                            {/* <img alt="gta" sizes="100vw" srcset="/icons/newsletter-section/nd-gta.svg 640w, /icons/newsletter-section/nd-gta.svg 750w, /icons/newsletter-section/nd-gta.svg 828w, /icons/newsletter-section/nd-gta.svg 1080w, /icons/newsletter-section/nd-gta.svg 1200w, /icons/newsletter-section/nd-gta.svg 1920w, /icons/newsletter-section/nd-gta.svg 2048w, /icons/newsletter-section/nd-gta.svg 3840w" src="/icons/newsletter-section/nd-gta.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="sc-c46e5164-28 dXonOA">
+                                    <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                        {/* <img alt="kfc" sizes="100vw" srcset="/icons/newsletter-section/nd-kfc.svg 640w, /icons/newsletter-section/nd-kfc.svg 750w, /icons/newsletter-section/nd-kfc.svg 828w, /icons/newsletter-section/nd-kfc.svg 1080w, /icons/newsletter-section/nd-kfc.svg 1200w, /icons/newsletter-section/nd-kfc.svg 1920w, /icons/newsletter-section/nd-kfc.svg 2048w, /icons/newsletter-section/nd-kfc.svg 3840w" src="/icons/newsletter-section/nd-kfc.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sc-c46e5164-27 cqDGkm">
+                                    <div class="sc-c46e5164-24 fLEZPc">
+                                        <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                            {/* <img alt="steam" sizes="100vw" srcset="/icons/newsletter-section/nd-steam.svg 640w, /icons/newsletter-section/nd-steam.svg 750w, /icons/newsletter-section/nd-steam.svg 828w, /icons/newsletter-section/nd-steam.svg 1080w, /icons/newsletter-section/nd-steam.svg 1200w, /icons/newsletter-section/nd-steam.svg 1920w, /icons/newsletter-section/nd-steam.svg 2048w, /icons/newsletter-section/nd-steam.svg 3840w" src="/icons/newsletter-section/nd-steam.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                        </span>
+                                    </div>
+                                    <div class="sc-c46e5164-28 dXonOA">
+                                        <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                            {/* <img alt="adidas" sizes="100vw" srcset="/icons/newsletter-section/nd-adidas.svg 640w, /icons/newsletter-section/nd-adidas.svg 750w, /icons/newsletter-section/nd-adidas.svg 828w, /icons/newsletter-section/nd-adidas.svg 1080w, /icons/newsletter-section/nd-adidas.svg 1200w, /icons/newsletter-section/nd-adidas.svg 1920w, /icons/newsletter-section/nd-adidas.svg 2048w, /icons/newsletter-section/nd-adidas.svg 3840w" src="/icons/newsletter-section/nd-adidas.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style={{display: 'flex', alignItems: 'center', gap: '10px',}}>
+                                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px',}}>
+                                        <div class="sc-c46e5164-28 dXonOA">
+                                            <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                                {/* <img alt="mario" sizes="100vw" srcset="/icons/newsletter-section/nd-mario.svg 640w, /icons/newsletter-section/nd-mario.svg 750w, /icons/newsletter-section/nd-mario.svg 828w, /icons/newsletter-section/nd-mario.svg 1080w, /icons/newsletter-section/nd-mario.svg 1200w, /icons/newsletter-section/nd-mario.svg 1920w, /icons/newsletter-section/nd-mario.svg 2048w, /icons/newsletter-section/nd-mario.svg 3840w" src="/icons/newsletter-section/nd-mario.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                            </span>
+                                        </div>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '10px',}}>
+                                            <div class="sc-c46e5164-24 fLEZPc">
+                                                <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                                    {/* <img alt="xbox" sizes="100vw" srcset="/icons/newsletter-section/nd-xbox.svg 640w, /icons/newsletter-section/nd-xbox.svg 750w, /icons/newsletter-section/nd-xbox.svg 828w, /icons/newsletter-section/nd-xbox.svg 1080w, /icons/newsletter-section/nd-xbox.svg 1200w, /icons/newsletter-section/nd-xbox.svg 1920w, /icons/newsletter-section/nd-xbox.svg 2048w, /icons/newsletter-section/nd-xbox.svg 3840w" src="/icons/newsletter-section/nd-xbox.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                                </span>
+                                            </div>
+                                            <div class="sc-c46e5164-24 fLEZPc">
+                                                <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                                    {/* <img alt="mcd" sizes="100vw" srcset="/icons/newsletter-section/nd-mcd.svg 640w, /icons/newsletter-section/nd-mcd.svg 750w, /icons/newsletter-section/nd-mcd.svg 828w, /icons/newsletter-section/nd-mcd.svg 1080w, /icons/newsletter-section/nd-mcd.svg 1200w, /icons/newsletter-section/nd-mcd.svg 1920w, /icons/newsletter-section/nd-mcd.svg 2048w, /icons/newsletter-section/nd-mcd.svg 3840w" src="/icons/newsletter-section/nd-mcd.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="sc-c46e5164-29 kGEJQZ">
+                                        <span style={{boxSizing: 'border-box', display: 'block', overflow: 'hidden', width: 'initial', height: 'initial', background: 'none', opacity: '1', border: '0px', margin: '0px', padding: '0px', position: 'absolute', inset: '0px',}}>
+                                            {/* <img alt="f1" sizes="100vw" srcset="/icons/newsletter-section/nd-f1.svg 640w, /icons/newsletter-section/nd-f1.svg 750w, /icons/newsletter-section/nd-f1.svg 828w, /icons/newsletter-section/nd-f1.svg 1080w, /icons/newsletter-section/nd-f1.svg 1200w, /icons/newsletter-section/nd-f1.svg 1920w, /icons/newsletter-section/nd-f1.svg 2048w, /icons/newsletter-section/nd-f1.svg 3840w" src="/icons/newsletter-section/nd-f1.svg" decoding="async" data-nimg="fill" style="position: absolute; inset: 0px; box-sizing: border-box; padding: 0px; border: none; margin: auto; display: block; width: 0px; height: 0px; min-width: 100%; max-width: 100%; min-height: 100%; max-height: 100%; object-fit: contain;" /> */}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
