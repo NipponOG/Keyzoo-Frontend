@@ -2,7 +2,7 @@ import React from 'react'
 
 const GlassCard = ({ title, value, color }) => {
     return (
-        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 shadow-2xl">
+        <div class="bg-white/5 backdrop-blur-lg rounded-xl p-6 shadow-sm">
             <div class="text-white flex flex-col items-center">
                 {/* <div class="w-12 h-12 bg-gradient-to-r from-pink-500 to-violet-500 rounded-lg mb-4 flex items-center justify-center">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">

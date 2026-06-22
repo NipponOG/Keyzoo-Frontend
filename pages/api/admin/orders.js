@@ -1,3 +1,5 @@
+// pages/api/admin/orders
+
 export default async function handler(req, res) {
     console.log("🔥 API HIT");
 
