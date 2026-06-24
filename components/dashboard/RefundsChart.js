@@ -43,7 +43,11 @@ const CustomTooltip = ({ active, payload, label }) => {
                 </span>
 
                 <span className="font-bold text-[#EF4444] ml-auto">
-                    ₹{payload[0].value.toLocaleString()}
+                    {/* ₹{payload[0].value.toLocaleString()} */}
+                    ₹ {payload[0].value.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    })}
                 </span>
             </div>
         </div>

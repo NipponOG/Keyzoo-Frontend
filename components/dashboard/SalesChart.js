@@ -1,15 +1,8 @@
 "use client";
 
-import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 // const data = [
 //     { month: "Jan", revenue: 12000 },
@@ -43,7 +36,11 @@ const CustomTooltip = ({ active, payload, label }) => {
                 </span>
 
                 <span className="font-bold text-green-400 ml-auto">
-                    ₹{payload[0].value.toLocaleString()}
+                    {/* ₹ {payload[0].value.toLocaleString()} */}
+                    ₹ {payload[0].value.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    })}
                 </span>
             </div>
         </div>

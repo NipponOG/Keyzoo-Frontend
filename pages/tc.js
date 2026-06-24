@@ -10,13 +10,14 @@ import ProfitCard from "@/components/dashboard/ProfitCard";
 import ActiveOffersCard from "@/components/dashboard/ActiveOffersCard";
 import WithdrawCard from "@/components/dashboard/WithdrawCard";
 import RecentSalesTable from "@/components/dashboard/RecentSalesTable";
-import Link from "next/link";
+import { MdContentCopy } from "react-icons/md";
 
 import { useEffect, useState } from "react";
 import GlassCard from "@/components/GlassCard";
 
 import { FaSearch } from "react-icons/fa";
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from "react-icons/md";
+import Image from "next/image";
 
 export default function Dashboard() {
 
@@ -36,6 +37,8 @@ export default function Dashboard() {
 
     const [orders, setOrders] = useState([]); // paginated list
     const [dashboardOrders, setDashboardOrders] = useState([]); // all orders
+
+    const [copiedValue, setCopiedValue] = useState("");   // handle copy to clipboard...
 
     const fetchOrders = async () => {
 
@@ -78,7 +81,7 @@ export default function Dashboard() {
         const token = localStorage.getItem("jwt");
 
         const res = await fetch(
-            `${STRAPI_URL}api/orders?pagination[pageSize]=500`,  // if need use 5 insted of 10
+            `${STRAPI_URL}api/orders?pagination[pageSize]=5000`,  // if need use 5 insted of 10
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -177,6 +180,24 @@ export default function Dashboard() {
         await fetchDashboardStats();
     };
 
+    const handleInvoice = async (orderId) => {
+        const token = localStorage.getItem("jwt");
+
+        await fetch(
+            `${STRAPI_URL}api/orders/send-invoice`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    orderId,
+                }),
+            }
+        );
+    };
+
     // const stats = {
     //     total: orders.length,
     //     pending: orders.filter(o => o.deliveryStatus === "pending").length,
@@ -195,11 +216,11 @@ export default function Dashboard() {
 
     const salesToday = dashboardOrders
         .filter((order) => {
-            const today = new Date().toDateString();
+            const today = new Date().toLocaleDateString("en-IN");
 
             return (
                 order.paymentStatus === "paid" &&
-                new Date(order.createdAt).toDateString() === today
+                new Date(order.createdAt).toLocaleDateString("en-IN") === today
             );
         })
         .reduce(
@@ -274,6 +295,20 @@ export default function Dashboard() {
         return [...new Set(pages)];
     };
 
+    const copyToClipboard = async (value) => {
+        try {
+            await navigator.clipboard.writeText(value);
+
+            setCopiedValue(value);
+
+            setTimeout(() => {
+                setCopiedValue("");
+            }, 2000);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
         <>
             <Head>
@@ -346,9 +381,9 @@ export default function Dashboard() {
                                     <div className="bg-white/5 rounded-xl px-4 py-3 flex items-center gap-4 relative overflow-hidden">
 
                                         {/* LEFT (fixed) */}
-                                        <Link href="/admin/orders" className="text-lg sm:text-xl shrink-0">
-                                            Orders Dashboard
-                                        </Link>
+                                        <span className="text-lg sm:text-xl shrink-0">
+                                            <Image src="https://res.cloudinary.com/dblttl9bh/image/upload/v1778325665/Chat_GPT_Image_May_9_2026_04_48_26_PM_1_113ae62610.png" alt="Logo" width={120} height={100} />
+                                        </span>
 
                                         {/* RIGHT (flexible) */}
                                         <div className="flex items-center gap-2 flex-1 justify-end">
@@ -362,7 +397,7 @@ export default function Dashboard() {
                                                         setSearch(e.target.value);
                                                     }}
                                                     placeholder="Search..."
-                                                    className="flex-1 h-[38px] bg-[#2a2a2a] px-3 rounded-lg outline-none text-sm"
+                                                    className="flex-1 h-[38px] bg-[#1a1a1a] px-3 rounded-lg outline-none text-sm"
                                                 />
 
                                                 {/* FILTERS */}
@@ -445,73 +480,160 @@ export default function Dashboard() {
 
                                     {/* ORDERS */}
                                     <div className="flex flex-col gap-4">
-                                        {orders.map((order) => (
-                                            <div key={order.id} className="bg-white/5 rounded-xl p-4 sm:p-6">
+                                        {orders.map((order) => {
 
-                                                <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                                            const assigned = order.totalKeysAssigned || 0;
+                                            const required = order.totalKeysRequired || 0;
 
-                                                    <div>
-                                                        <h2 className="text-sm sm:text-base font-semibold">
-                                                            {order.orderNumber}
-                                                        </h2>
-                                                        <p className="text-md sm:text-sm text-gray-300 break-all">
-                                                            {order.deliveryEmail}
-                                                        </p>
+                                            const percentage =
+                                                required > 0
+                                                    ? Math.round((assigned / required) * 100)
+                                                    : 0;
+
+                                            const progressColor =
+                                                order.deliveryStatus === "completed"
+                                                    ? "bg-green-500"
+                                                    : order.deliveryStatus === "partial"
+                                                        ? "bg-yellow-500"
+                                                        : "bg-red-500";
+                                            return (
+                                                <div key={order.id} className="bg-white/[0.03] border border-white/5 rounded-xl p-6">
+
+                                                    <div className="flex flex-col md:flex-row md:justify-between gap-3">
+
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-500 text-xs uppercase tracking-wider">
+                                                                    Order ID
+                                                                </span>
+                                                                <h2 className="text-sm sm:text-base font-semibold cursor-pointer" onClick={() => copyToClipboard(order.orderNumber)}>
+                                                                    {order.orderNumber}
+                                                                </h2>
+
+                                                                <button
+                                                                    onClick={() => copyToClipboard(order.orderNumber)}
+                                                                    className="text-gray-400 hover:text-white transition"
+                                                                    title="Copy Order Number"
+                                                                >
+                                                                    <MdContentCopy className="text-lg cursor-pointer" />
+                                                                </button>
+
+                                                                {copiedValue === order.orderNumber && (
+                                                                    <span className="text-green-400 text-xs">
+                                                                        Copied
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-500 text-xs uppercase tracking-wider">
+                                                                    Order Email
+                                                                </span>
+                                                                <p className="text-md sm:text-sm text-gray-300 break-all cursor-pointer" onClick={() => copyToClipboard(order.deliveryEmail)}>
+                                                                    {order.deliveryEmail}
+                                                                </p>
+
+                                                                <button
+                                                                    onClick={() => copyToClipboard(order.deliveryEmail)}
+                                                                    className="text-gray-400 hover:text-white transition"
+                                                                    title="Copy Email"
+                                                                >
+                                                                    <MdContentCopy className="text-lg cursor-pointer" />
+                                                                </button>
+
+                                                                {copiedValue === order.deliveryEmail && (
+                                                                    <span className="text-green-400 text-xs">
+                                                                        Copied
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex flex-wrap gap-5 items-center">
+                                                            {order.manualDeliveryRequired && (
+                                                                // <span className="text-orange-400 text-md font-semibold">
+                                                                //     ⚠ Needs Attention
+                                                                // </span>
+                                                                <span className="px-3 py-1 rounded-full bg-orange-500/15 text-orange-400 text-sm font-medium">
+                                                                    ⚠ Manual
+                                                                </span>
+                                                            )}
+
+                                                            <span className={`py-1 px-2 rounded text-md capitalize ${order.deliveryStatus === "completed" ? "bg-green-500/15 text-green-400" : order.deliveryStatus === "partial" ? "bg-yellow-500/15 text-yellow-400" : "bg-red-500/15 text-red-400"}`}>
+                                                                {order.deliveryStatus}
+                                                            </span>
+                                                        </div>
+
                                                     </div>
 
-                                                    <div className="flex flex-wrap gap-5 items-center">
-                                                        {order.manualDeliveryRequired && (
-                                                            <span className="text-orange-400 text-md font-semibold">
-                                                                ⚠ Needs Attention
-                                                            </span>
+                                                    {/* <div className="mt-3 text-sm">
+                                                        {order.totalKeysAssigned || 0} / {order.totalKeysRequired || 0}
+                                                    </div> */}
+
+                                                    <div className="mt-4">
+                                                        <div className="flex justify-between text-xs text-gray-400 mb-2">
+                                                            <span>Delivery Progress</span>
+                                                            <span>{percentage}%</span>
+                                                        </div>
+
+                                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                            <div
+                                                                className={`h-full transition-all duration-500 ${progressColor}`}
+                                                                style={{
+                                                                    width: `${percentage}%`,
+                                                                }}
+                                                            />
+
+                                                        </div>
+
+
+                                                        <div className="text-xs text-gray-400 mt-2">
+                                                            {assigned} of {required} keys delivered
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-wrap gap-2.5 mt-4 text-sm">
+
+                                                        {order.deliveryStatus !== "completed" && (
+                                                            <button
+                                                                onClick={() => handleSendKeys(order.id)}
+                                                                className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                                                            >
+                                                                Send Keys
+                                                            </button>
                                                         )}
 
-                                                        <span className={`py-1 px-2 rounded text-md capitalize ${order.deliveryStatus === "completed" ? "bg-green-500" : order.deliveryStatus === "partial" ? "bg-yellow-500" : "bg-red-500"}`}>
-                                                            {order.deliveryStatus}
-                                                        </span>
-                                                    </div>
-
-                                                </div>
-
-                                                <div className="mt-3 text-sm">
-                                                    {order.totalKeysAssigned || 0} / {order.totalKeysRequired || 0}
-                                                </div>
-
-                                                <div className="flex flex-wrap gap-2.5 mt-4 text-sm">
-
-                                                    {order.deliveryStatus !== "completed" && (
                                                         <button
-                                                            onClick={() => handleSendKeys(order.id)}
-                                                            className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                                                            onClick={() => setSelectedOrder(order)}
+                                                            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
                                                         >
-                                                            Send Keys
+                                                            Details
                                                         </button>
-                                                    )}
 
-                                                    <button
-                                                        onClick={() => setSelectedOrder(order)}
-                                                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                                                    >
-                                                        Details
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleResend(order.id)}
+                                                            className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded"
+                                                        >
+                                                            Resend Key
+                                                        </button>
 
-                                                    <button
-                                                        onClick={() => handleResend(order.id)}
-                                                        className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded"
-                                                    >
-                                                        Resend
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleInvoice(order.id)}
+                                                            className="bg-purple-500/20 hover:bg-purple-500/40 text-purple-400 py-2 px-4 rounded"
+                                                        >
+                                                            Send Invoice
+                                                        </button>
 
-                                                    <button
-                                                        onClick={() => handleDelete(order.id)}
-                                                        className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleDelete(order.id)}
+                                                            className="bg-red-500/20 hover:bg-red-500/40 text-red-400 py-2 px-4 rounded"
+                                                        >
+                                                            Delete
+                                                        </button>
 
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
 
                                     {/* PAGINATION */}
