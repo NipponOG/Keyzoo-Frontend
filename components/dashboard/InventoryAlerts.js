@@ -1,0 +1,71 @@
+import { useEffect, useState } from "react";
+
+export default function InventoryAlerts() {
+
+    const [alerts, setAlerts] = useState([]);
+
+    useEffect(() => {
+
+        const loadAlerts = async () => {
+
+            const res = await fetch(
+                "/api/admin/inventory"
+            );
+
+            const data = await res.json();
+
+            setAlerts(data.alerts || []);
+        };
+
+        loadAlerts();
+
+    }, []);
+
+    return (
+        <div className="rounded-xl border border-[#23262d] bg-[#1d1d1d] p-6">
+
+            <h3 className="text-white font-semibold mb-6">
+                Inventory Alerts
+            </h3>
+
+            <div className="space-y-3">
+
+                {alerts.length === 0 && (
+                    <p className="text-green-400 text-sm">
+                        All products healthy
+                    </p>
+                )}
+
+                {alerts.map((item) => (
+                    <div
+                        key={item.id}
+                        className="flex items-center justify-between"
+                    >
+                        <div>
+                            <p className="text-white text-sm">
+                                {item.title}
+                            </p>
+
+                            <p className="text-xs text-gray-400">
+                                {item.availableKeys} keys left
+                            </p>
+                        </div>
+
+                        <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                                item.status === "out"
+                                    ? "bg-red-500/15 text-red-400"
+                                    : "bg-yellow-500/15 text-yellow-400"
+                            }`}
+                        >
+                            {item.status === "out"
+                                ? "Out Stock"
+                                : "Low Stock"}
+                        </span>
+                    </div>
+                ))}
+
+            </div>
+        </div>
+    );
+}

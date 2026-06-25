@@ -5,11 +5,12 @@ import SalesChart from "@/components/dashboard/SalesChart";
 import OrderChart from "@/components/dashboard/OrderChart";
 import RefundsChart from "@/components/dashboard/RefundsChart";
 import CategorySales from "@/components/dashboard/CategorySales";
+import InventoryAlerts from "@/components/dashboard/InventoryAlerts";
 import Sales7DaysCard from "@/components/dashboard/Sales7DaysCard";
 import ProfitCard from "@/components/dashboard/ProfitCard";
 import ActiveOffersCard from "@/components/dashboard/ActiveOffersCard";
 import WithdrawCard from "@/components/dashboard/WithdrawCard";
-import RecentSalesTable from "@/components/dashboard/RecentSalesTable";
+import InventoryCard from "@/components/dashboard/InventoryCard";
 import { MdContentCopy } from "react-icons/md";
 
 import { useEffect, useState } from "react";
@@ -39,6 +40,14 @@ export default function Dashboard() {
     const [dashboardOrders, setDashboardOrders] = useState([]); // all orders
 
     const [copiedValue, setCopiedValue] = useState("");   // handle copy to clipboard...
+
+    const [inventory, setInventory] = useState({
+        totalProducts: 0,
+        totalKeys: 0,
+        lowStock: 0,
+        outOfStock: 0,
+        alerts: [],
+    });
 
     const fetchOrders = async () => {
 
@@ -101,9 +110,11 @@ export default function Dashboard() {
     useEffect(() => {
         fetchDashboardStats();
         fetchProductsCount();
+        fetchInventory();
 
         const interval = setInterval(() => {
             fetchDashboardStats();
+            fetchInventory();
         }, 60000);
 
         return () => clearInterval(interval);
@@ -180,23 +191,23 @@ export default function Dashboard() {
         await fetchDashboardStats();
     };
 
-    const handleInvoice = async (orderId) => {
-        const token = localStorage.getItem("jwt");
+    // const handleInvoice = async (orderId) => {
+    //     const token = localStorage.getItem("jwt");
 
-        await fetch(
-            `${STRAPI_URL}api/orders/send-invoice`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    orderId,
-                }),
-            }
-        );
-    };
+    //     await fetch(
+    //         `${STRAPI_URL}api/orders/send-invoice`,
+    //         {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //             body: JSON.stringify({
+    //                 orderId,
+    //             }),
+    //         }
+    //     );
+    // };
 
     // const stats = {
     //     total: orders.length,
@@ -309,6 +320,23 @@ export default function Dashboard() {
         }
     };
 
+    const fetchInventory = async () => {
+        const res = await fetch(
+            "/api/admin/inventory"
+        );
+
+        const data = await res.json();
+
+        setInventory(data);
+    };
+
+    const exportOrders = () => {
+        window.open(
+            "/api/admin/export-orders",
+            "_blank"
+        );
+    };
+
     return (
         <>
             <Head>
@@ -329,6 +357,46 @@ export default function Dashboard() {
                     </div>
 
                     {/* <MetricCards /> */}
+                    <div className="grid grid-cols-12 gap-5">
+
+                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                            <InventoryCard
+                                title="Available Keys"
+                                value={inventory.totalKeys}
+                                color="green"
+                            />
+
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                            <InventoryCard
+                                title="Low Stock"
+                                value={inventory.lowStock}
+                                color="yellow"
+                            />
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                            <InventoryCard
+                                title="Out Of Stock"
+                                value={inventory.outOfStock}
+                                color="red"
+                            />
+                        </div>
+
+                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                            <InventoryCard
+                                title="Products Tracked"
+                                value={inventory.totalProducts}
+                                color="blue"
+                            />
+                        </div>
+
+                        <div className="col-span-12">
+                            <InventoryAlerts />
+                        </div>
+
+                    </div>
 
                     <div className="grid grid-cols-12 gap-5">
 
@@ -356,7 +424,7 @@ export default function Dashboard() {
 
                         <div className="col-span-12 lg:col-span-4 space-y-5">
                             <CategorySales />
-                            {/* <WithdrawCard /> */}
+                            {/* <InventoryAlerts /> */}
                         </div>
 
                         {/* <div className="col-span-12 lg:col-span-4">
@@ -372,6 +440,8 @@ export default function Dashboard() {
                             <OrderChart />
                             <RefundsChart />
                         </div>
+
+                        {/* Order Section Start Here... */}
 
                         <div className="col-span-12 md:col-span-12">
                             <div className="bg-[#1d1d1d] rounded-xl border border-white/5 text-white">
@@ -617,10 +687,10 @@ export default function Dashboard() {
                                                         </button>
 
                                                         <button
-                                                            onClick={() => handleInvoice(order.id)}
-                                                            className="bg-purple-500/20 hover:bg-purple-500/40 text-purple-400 py-2 px-4 rounded"
+                                                            onClick={exportOrders}
+                                                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
                                                         >
-                                                            Send Invoice
+                                                            Export Orders CSV
                                                         </button>
 
                                                         <button
