@@ -83,6 +83,12 @@ export default async function handler(req, res) {
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
                 },
+            },
+            `${process.env.STRAPI_URL}api/game-keys?populate=giftCard&pagination[pageSize]=5000`,
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
+                },
             }
         );
 
@@ -154,6 +160,7 @@ export default async function handler(req, res) {
                     })
                 ),
             ],
+            products,
         });
 
     } catch (error) {
@@ -165,3 +172,219 @@ export default async function handler(req, res) {
         });
     }
 }
+
+// pages/api/admin/inventory.js
+
+// export default async function handler(req, res) {
+//     try {
+
+//         const headers = {
+//             Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
+//         };
+
+//         const [
+//             productsRes,
+//             giftCardsRes,
+//             keysRes,
+//         ] = await Promise.all([
+
+//             fetch(
+//                 `${process.env.STRAPI_URL}api/products?populate=*&pagination[pageSize]=1000`,
+//                 { headers }
+//             ),
+
+//             fetch(
+//                 `${process.env.STRAPI_URL}api/gift-cards?populate=*&pagination[pageSize]=1000`,
+//                 { headers }
+//             ),
+
+//             fetch(
+//                 `${process.env.STRAPI_URL}api/game-keys?populate=product,giftCard&pagination[pageSize]=10000`,
+//                 { headers }
+//             ),
+
+//         ]);
+
+//         const products =
+//             (await productsRes.json()).data || [];
+
+//         const giftCards =
+//             (await giftCardsRes.json()).data || [];
+
+//         const keys =
+//             (await keysRes.json()).data || [];
+
+//         const inventory = [];
+
+//         const alerts = [];
+
+//         let totalAvailableKeys = 0;
+//         let lowStock = 0;
+//         let outOfStock = 0;
+
+//         //---------------------------------------------------
+//         // PRODUCTS
+//         //---------------------------------------------------
+
+//         products.forEach((product) => {
+
+//             const productKeys = keys.filter((key) => {
+
+//                 return (
+//                     key.product &&
+//                     key.product.id === product.id
+//                 );
+
+//             });
+
+//             const availableKeys =
+//                 productKeys.filter(k => k.isAvailable).length;
+
+//             const soldKeys =
+//                 productKeys.length - availableKeys;
+
+//             const totalKeys =
+//                 productKeys.length;
+
+//             totalAvailableKeys += availableKeys;
+
+//             let status = "healthy";
+
+//             if (availableKeys === 0) {
+
+//                 status = "out";
+//                 outOfStock++;
+
+//                 alerts.push({
+//                     id: product.id,
+//                     type: "product",
+//                     title: product.title,
+//                     availableKeys,
+//                     status: "out",
+//                 });
+
+//             } else if (availableKeys <= 10) {
+
+//                 status = "low";
+//                 lowStock++;
+
+//                 alerts.push({
+//                     id: product.id,
+//                     type: "product",
+//                     title: product.title,
+//                     availableKeys,
+//                     status: "low",
+//                 });
+
+//             }
+
+//             inventory.push({
+//                 ...product,
+
+//                 inventoryType: "product",
+
+//                 availableKeys,
+//                 soldKeys,
+//                 totalKeys,
+//                 status,
+//             });
+
+//         });
+
+//         //---------------------------------------------------
+//         // GIFT CARDS
+//         //---------------------------------------------------
+
+//         giftCards.forEach((giftCard) => {
+
+//             const giftCardKeys = keys.filter((key) => {
+
+//                 return (
+//                     key.giftCard &&
+//                     key.giftCard.id === giftCard.id
+//                 );
+
+//             });
+
+//             const availableKeys =
+//                 giftCardKeys.filter(k => k.isAvailable).length;
+
+//             const soldKeys =
+//                 giftCardKeys.length - availableKeys;
+
+//             const totalKeys =
+//                 giftCardKeys.length;
+
+//             totalAvailableKeys += availableKeys;
+
+//             let status = "healthy";
+
+//             if (availableKeys === 0) {
+
+//                 status = "out";
+//                 outOfStock++;
+
+//                 alerts.push({
+//                     id: giftCard.id,
+//                     type: "gift-card",
+//                     title: giftCard.title,
+//                     availableKeys,
+//                     status: "out",
+//                 });
+
+//             } else if (availableKeys <= 10) {
+
+//                 status = "low";
+//                 lowStock++;
+
+//                 alerts.push({
+//                     id: giftCard.id,
+//                     type: "gift-card",
+//                     title: giftCard.title,
+//                     availableKeys,
+//                     status: "low",
+//                 });
+
+//             }
+
+//             inventory.push({
+//                 ...giftCard,
+
+//                 inventoryType: "gift-card",
+
+//                 availableKeys,
+//                 soldKeys,
+//                 totalKeys,
+//                 status,
+//             });
+
+//         });
+
+//         //---------------------------------------------------
+
+//         res.status(200).json({
+
+//             totalProducts: inventory.length,
+
+//             totalKeys: totalAvailableKeys,
+
+//             lowStock,
+
+//             outOfStock,
+
+//             alerts,
+
+//             products: inventory,
+
+//         });
+
+//     } catch (err) {
+
+//         console.error(err);
+
+//         res.status(500).json({
+//             error: "Inventory fetch failed",
+//         });
+
+//     }
+// }

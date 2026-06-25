@@ -9,20 +9,20 @@ import InventoryAlerts from "@/components/dashboard/InventoryAlerts";
 import Sales7DaysCard from "@/components/dashboard/Sales7DaysCard";
 import ProfitCard from "@/components/dashboard/ProfitCard";
 import ActiveOffersCard from "@/components/dashboard/ActiveOffersCard";
-import WithdrawCard from "@/components/dashboard/WithdrawCard";
+import ProductInventoryRow from "@/components/dashboard/ProductInventoryRow";
 import InventoryCard from "@/components/dashboard/InventoryCard";
 import { MdContentCopy } from "react-icons/md";
-
+import { fetchFromStrapi } from '@/lib/strapi';
 import { useEffect, useState } from "react";
 import GlassCard from "@/components/GlassCard";
-
+import UploadKeysModal from "@/components/dashboard/UploadKeysModal";
 import { FaSearch } from "react-icons/fa";
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
 
 export default function Dashboard() {
 
-    // const [orders, setOrders] = useState([]);
+    const [products, setProducts] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -48,6 +48,8 @@ export default function Dashboard() {
         outOfStock: 0,
         alerts: [],
     });
+
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const fetchOrders = async () => {
 
@@ -118,6 +120,39 @@ export default function Dashboard() {
         }, 60000);
 
         return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        async function getProducts() {
+            try {
+                const [productsRes, giftCardsRes] = await Promise.all([
+                    fetchFromStrapi(
+                        "api/products?populate=*"
+                    ),
+                    fetchFromStrapi(
+                        "api/gift-cards?populate=*"
+                    ),
+                ]);
+
+                const items = [
+                    ...(productsRes.data || []).map(item => ({
+                        ...item,
+                        type: "product",
+                    })),
+                    ...(giftCardsRes.data || []).map(item => ({
+                        ...item,
+                        type: "gift-card",
+                    })),
+                ];
+
+                setProducts(items);
+
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+            }
+        }
+
+        getProducts();
     }, []);
 
     // useEffect(() => {
@@ -330,6 +365,22 @@ export default function Dashboard() {
         setInventory(data);
     };
 
+    // const fetchInventory = async () => {
+    //     const res = await fetch("/api/admin/inventory");
+
+    //     const data = await res.json();
+
+    //     setInventory({
+    //         totalProducts: data.totalProducts,
+    //         totalKeys: data.totalKeys,
+    //         lowStock: data.lowStock,
+    //         outOfStock: data.outOfStock,
+    //         alerts: data.alerts,
+    //     });
+
+    //     setProducts(data.products || []);
+    // };
+
     const exportOrders = () => {
         window.open(
             "/api/admin/export-orders",
@@ -394,6 +445,33 @@ export default function Dashboard() {
 
                         <div className="col-span-12">
                             <InventoryAlerts />
+                        </div>
+
+                        <div className="col-span-12">
+
+                            {/* Product Featch */}
+                            <div className="border-[#23262d] rounded-xl">
+                                <div className="space-y-4">
+                                    {products.map((product) => (
+                                        <ProductInventoryRow
+                                            key={product.documentId || product.id}
+                                            product={product}
+                                            onUpload={() => setSelectedProduct(product)}
+                                        />
+                                    ))}
+
+                                    {selectedProduct && (
+                                        <UploadKeysModal
+                                            product={selectedProduct}
+                                            onClose={() => setSelectedProduct(null)}
+                                            onUpload={(keys) => {
+                                                console.log(keys);
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>
