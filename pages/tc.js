@@ -16,15 +16,20 @@ import { fetchFromStrapi } from '@/lib/strapi';
 import { useEffect, useState } from "react";
 import GlassCard from "@/components/GlassCard";
 import UploadKeysModal from "@/components/dashboard/UploadKeysModal";
+import ViewKeysModal from "@/components/dashboard/ViewKeysModal";
 import { FaSearch } from "react-icons/fa";
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 export default function Dashboard() {
 
     const [products, setProducts] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
+
+    const [viewProduct, setViewProduct] = useState(null);
+    const [viewKeys, setViewKeys] = useState([]);
 
     const [showSearch, setShowSearch] = useState(false);
 
@@ -122,38 +127,38 @@ export default function Dashboard() {
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        async function getProducts() {
-            try {
-                const [productsRes, giftCardsRes] = await Promise.all([
-                    fetchFromStrapi(
-                        "api/products?populate=*"
-                    ),
-                    fetchFromStrapi(
-                        "api/gift-cards?populate=*"
-                    ),
-                ]);
+    // useEffect(() => {
+    //     async function getProducts() {
+    //         try {
+    //             const [productsRes, giftCardsRes] = await Promise.all([
+    //                 fetchFromStrapi(
+    //                     "api/products?populate=*"
+    //                 ),
+    //                 fetchFromStrapi(
+    //                     "api/gift-cards?populate=*"
+    //                 ),
+    //             ]);
 
-                const items = [
-                    ...(productsRes.data || []).map(item => ({
-                        ...item,
-                        type: "product",
-                    })),
-                    ...(giftCardsRes.data || []).map(item => ({
-                        ...item,
-                        type: "gift-card",
-                    })),
-                ];
+    //             const items = [
+    //                 ...(productsRes.data || []).map(item => ({
+    //                     ...item,
+    //                     type: "product",
+    //                 })),
+    //                 ...(giftCardsRes.data || []).map(item => ({
+    //                     ...item,
+    //                     type: "gift-card",
+    //                 })),
+    //             ];
 
-                setProducts(items);
+    //             setProducts(items);
 
-            } catch (error) {
-                console.error("Failed to fetch products:", error);
-            }
-        }
+    //         } catch (error) {
+    //             console.error("Failed to fetch products:", error);
+    //         }
+    //     }
 
-        getProducts();
-    }, []);
+    //     getProducts();
+    // }, []);
 
     // useEffect(() => {
     //     const token = localStorage.getItem("jwt");
@@ -355,14 +360,28 @@ export default function Dashboard() {
         }
     };
 
-    const fetchInventory = async () => {
-        const res = await fetch(
-            "/api/admin/inventory"
-        );
+    // const fetchInventory = async () => {
+    //     const res = await fetch(
+    //         "/api/admin/inventory"
+    //     );
 
+    //     const data = await res.json();
+
+    //     setInventory(data);
+    // };
+
+    const fetchInventory = async () => {
+        const res = await fetch("/api/admin/inventory");
         const data = await res.json();
 
-        setInventory(data);
+        setInventory({
+            totalProducts: data.totalProducts,
+            totalKeys: data.totalKeys,
+            lowStock: data.lowStock,
+            outOfStock: data.outOfStock,
+        });
+
+        setProducts(data.products || []);
     };
 
     // const fetchInventory = async () => {
@@ -380,6 +399,20 @@ export default function Dashboard() {
 
     //     setProducts(data.products || []);
     // };
+
+    const handleViewKeys = async (product) => {
+
+        setViewProduct(product);
+
+        const res = await fetch(
+            `/api/admin/view-keys?productId=${product.documentId || product.id}&type=${product.type}`
+        );
+
+        const data = await res.json();
+
+        setViewKeys(data.keys || []);
+
+    };
 
     const exportOrders = () => {
         window.open(
@@ -457,6 +490,7 @@ export default function Dashboard() {
                                             key={product.documentId || product.id}
                                             product={product}
                                             onUpload={() => setSelectedProduct(product)}
+                                            onView={() => handleViewKeys(product)}
                                         />
                                     ))}
 
@@ -468,6 +502,47 @@ export default function Dashboard() {
                                                 console.log(keys);
                                             }}
                                         />
+                                    )}
+
+                                    {viewProduct && (
+
+                                        <ViewKeysModal
+                                            product={viewProduct}
+                                            keys={viewKeys}
+                                            onClose={() => {
+                                                setViewProduct(null);
+                                                setViewKeys([]);
+                                            }}
+                                            onDelete={(updatedKeys) => {
+
+                                                setViewKeys(updatedKeys);
+
+                                                // Update the inventory card
+                                                setProducts(prev =>
+                                                    prev.map(item => {
+
+                                                        if (item.documentId !== viewProduct.documentId) {
+                                                            return item;
+                                                        }
+
+                                                        const availableKeys =
+                                                            updatedKeys.filter(k => k.isAvailable).length;
+
+                                                        const soldKeys =
+                                                            updatedKeys.length - availableKeys;
+
+                                                        return {
+                                                            ...item,
+                                                            availableKeys,
+                                                            soldKeys,
+                                                        };
+
+                                                    })
+                                                );
+
+                                            }}
+                                        />
+
                                     )}
                                 </div>
                             </div>
@@ -849,6 +924,7 @@ export default function Dashboard() {
 
                 </div>
             </div>
+            <ScrollToTopButton />
         </>
     );
 }

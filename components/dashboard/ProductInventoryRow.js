@@ -46,23 +46,60 @@ import {
     FiTrash2,
 } from "react-icons/fi";
 
-export default function ProductInventoryRow({ product, onUpload }) {
+export default function ProductInventoryRow({ product, onUpload, onView }) {
 
-    const availableKeys = product.availableKeys ?? 10;
-    const soldKeys = product.soldKeys ?? 5;
-    const totalKeys = availableKeys + soldKeys;
+    // const availableKeys = product.availableKeys ?? 10;
+    // const soldKeys = product.soldKeys ?? 5;
+    // const totalKeys = availableKeys + soldKeys;
+
+
+
+    // const progress =
+    //     totalKeys === 0
+    //         ? 0
+    //         : Math.round((availableKeys / totalKeys) * 100);
+
+    // const status =
+    //     availableKeys === 0
+    //         ? "Out of Stock"
+    //         : availableKeys <= 5
+    //             ? "Low Stock"
+    //             : "Healthy";
+
+    const availableKeys = Number(product.availableKeys || 0);
+    const soldKeys = Number(product.soldKeys || 0);
+    const totalKeys = Number(product.totalKeys || (availableKeys + soldKeys));
 
     const progress =
-        totalKeys === 0
-            ? 0
-            : Math.round((availableKeys / totalKeys) * 100);
+        totalKeys > 0
+            ? Math.round((availableKeys / totalKeys) * 100)
+            : 0;
 
     const status =
-        availableKeys === 0
+        product.status ||
+        (availableKeys === 0
             ? "Out of Stock"
             : availableKeys <= 5
                 ? "Low Stock"
-                : "Healthy";
+                : "Healthy");
+
+    const statusConfig = {
+        healthy: {
+            label: "Healthy",
+            className: "bg-green-500/15 text-green-400",
+        },
+        low: {
+            label: "Low Stock",
+            className: "bg-yellow-500/15 text-yellow-400",
+        },
+        out: {
+            label: "Out of Stock",
+            className: "bg-red-500/15 text-red-400",
+        },
+    };
+
+    const currentStatus =
+        statusConfig[status] || statusConfig.out;
 
     return (
         <div className="rounded-2xl border border-[#2b2b2b] bg-[#1b1b1b] p-6">
@@ -79,7 +116,7 @@ export default function ProductInventoryRow({ product, onUpload }) {
                         alt={product.title}
                         width={110}
                         height={150}
-                        className="rounded-xl object-cover"
+                        className="rounded-xl object-center"
                     />
 
                     <div className="flex flex-col justify-between">
@@ -110,7 +147,7 @@ export default function ProductInventoryRow({ product, onUpload }) {
 
                         <p className="text-sm text-gray-500 mt-5">
 
-                            Product ID : {product.id || product.documentId}
+                            Product ID : {product.documentId || product.id}
 
                         </p>
 
@@ -168,7 +205,7 @@ export default function ProductInventoryRow({ product, onUpload }) {
 
                             <div className="mt-3">
 
-                                {status === "Healthy" && (
+                                {/* {status === "Healthy" && (
                                     <span className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-sm">
                                         Healthy
                                     </span>
@@ -184,7 +221,24 @@ export default function ProductInventoryRow({ product, onUpload }) {
                                     <span className="px-3 py-1 rounded-full bg-red-500/15 text-red-400 text-sm">
                                         Out of Stock
                                     </span>
-                                )}
+                                )} */}
+
+                                {/* <span
+                                    className={`px-3 py-1 rounded-full text-sm ${status === "Healthy"
+                                        ? "bg-green-500/15 text-green-400"
+                                        : status === "Low Stock"
+                                            ? "bg-yellow-500/15 text-yellow-400"
+                                            : "bg-red-500/15 text-red-400"
+                                        }`}
+                                >
+                                    {status}
+                                </span> */}
+
+                                <span
+                                    className={`px-3 py-1 rounded-full text-sm ${currentStatus.className}`}
+                                >
+                                    {currentStatus.label}
+                                </span>
 
                             </div>
 
@@ -231,7 +285,7 @@ export default function ProductInventoryRow({ product, onUpload }) {
 
                     </button>
 
-                    <button className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-[#2b2b2b] hover:bg-[#343434] px-4 py-2 text-sm">
+                    <button onClick={onView} className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-[#2b2b2b] hover:bg-[#343434] px-4 py-2 text-sm">
 
                         <FiEye />
 
@@ -239,7 +293,7 @@ export default function ProductInventoryRow({ product, onUpload }) {
 
                     </button>
 
-                    <button className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-[#2b2b2b] hover:bg-[#343434] px-4 py-2 text-sm">
+                    <button disabled className="cursor-not-allowed flex items-center justify-center gap-2 rounded-lg bg-[#2b2b2b] hover:bg-[#343434] px-4 py-2 text-sm">
 
                         <FiEdit2 />
 
@@ -247,7 +301,7 @@ export default function ProductInventoryRow({ product, onUpload }) {
 
                     </button>
 
-                    <button className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-400 px-4 py-2 text-sm">
+                    <button disabled className="cursor-not-allowed flex items-center justify-center gap-2 rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-400 px-4 py-2 text-sm">
 
                         <FiTrash2 />
 

@@ -14,7 +14,11 @@ export default function InventoryAlerts() {
 
             const data = await res.json();
 
-            setAlerts(data.alerts || []);
+            const alerts = data.products.filter(
+                (item) => item.status === "low" || item.status === "out"
+            );
+
+            setAlerts(alerts);
         };
 
         loadAlerts();
@@ -52,11 +56,10 @@ export default function InventoryAlerts() {
                         </div>
 
                         <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                                item.status === "out"
+                            className={`text-xs px-2 py-1 rounded-full ${item.status === "out"
                                     ? "bg-red-500/15 text-red-400"
                                     : "bg-yellow-500/15 text-yellow-400"
-                            }`}
+                                }`}
                         >
                             {item.status === "out"
                                 ? "Out Stock"
