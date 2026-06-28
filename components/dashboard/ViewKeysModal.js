@@ -158,7 +158,7 @@ export default function ViewKeysModal({
                             alt={product.title}
                             width={90}
                             height={120}
-                            className="rounded-lg object-cover"
+                            className="rounded-lg object-center"
                         />
 
                         <div className="flex-1">

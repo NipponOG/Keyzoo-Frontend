@@ -12,7 +12,7 @@ import ActiveOffersCard from "@/components/dashboard/ActiveOffersCard";
 import ProductInventoryRow from "@/components/dashboard/ProductInventoryRow";
 import InventoryCard from "@/components/dashboard/InventoryCard";
 import { MdContentCopy } from "react-icons/md";
-import { fetchFromStrapi } from '@/lib/strapi';
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import GlassCard from "@/components/GlassCard";
 import UploadKeysModal from "@/components/dashboard/UploadKeysModal";
@@ -45,6 +45,12 @@ export default function Dashboard() {
     const [dashboardOrders, setDashboardOrders] = useState([]); // all orders
 
     const [copiedValue, setCopiedValue] = useState("");   // handle copy to clipboard...
+
+    const [inventoryExpanded, setInventoryExpanded] = useState(false);
+
+    const visibleProducts = inventoryExpanded
+        ? products
+        : products.slice(0, 5);
 
     const [inventory, setInventory] = useState({
         totalProducts: 0,
@@ -483,148 +489,245 @@ export default function Dashboard() {
                         <div className="col-span-12">
 
                             {/* Product Featch */}
-                            <div className="border-[#23262d] rounded-xl">
-                                <div className="space-y-4">
-                                    {products.map((product) => (
-                                        <ProductInventoryRow
-                                            key={product.documentId || product.id}
-                                            product={product}
-                                            onUpload={() => setSelectedProduct(product)}
-                                            onView={() => handleViewKeys(product)}
-                                        />
-                                    ))}
+                            <div className="rounded-2xl border border-[#23262d] bg-[#1b1b1b] p-6">
 
-                                    {selectedProduct && (
-                                        <UploadKeysModal
-                                            product={selectedProduct}
-                                            onClose={() => setSelectedProduct(null)}
-                                            onUpload={(keys) => {
-                                                console.log(keys);
-                                            }}
-                                        />
-                                    )}
+                                <div className="flex items-center justify-between mb-6">
 
-                                    {viewProduct && (
+                                    <div>
 
-                                        <ViewKeysModal
-                                            product={viewProduct}
-                                            keys={viewKeys}
-                                            onClose={() => {
-                                                setViewProduct(null);
-                                                setViewKeys([]);
-                                            }}
-                                            onDelete={(updatedKeys) => {
+                                        <h2 className="text-xl font-semibold text-white">
+                                            Product Inventory
+                                        </h2>
 
-                                                setViewKeys(updatedKeys);
+                                        <p className="text-sm text-gray-400 mt-1">
+                                            {products.length} products
+                                        </p>
 
-                                                // Update the inventory card
-                                                setProducts(prev =>
-                                                    prev.map(item => {
+                                    </div>
 
-                                                        if (item.documentId !== viewProduct.documentId) {
-                                                            return item;
-                                                        }
+                                    {products.length > 5 && (
 
-                                                        const availableKeys =
-                                                            updatedKeys.filter(k => k.isAvailable).length;
+                                        <button
+                                            onClick={() =>
+                                                setInventoryExpanded(!inventoryExpanded)
+                                            }
+                                            className="flex items-center gap-2 rounded-lg border border-[#2b2b2b] bg-[#232323] px-4 py-2 text-sm hover:bg-[#2d2d2d]"
+                                        >
 
-                                                        const soldKeys =
-                                                            updatedKeys.length - availableKeys;
+                                            {inventoryExpanded ? (
+                                                <>
+                                                    <FiChevronUp />
+                                                    Collapse
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FiChevronDown />
+                                                    View All ({products.length})
+                                                </>
+                                            )}
 
-                                                        return {
-                                                            ...item,
-                                                            availableKeys,
-                                                            soldKeys,
-                                                        };
-
-                                                    })
-                                                );
-
-                                            }}
-                                        />
+                                        </button>
 
                                     )}
+
                                 </div>
+
+                                <div
+                                    className={`space-y-4 transition-all duration-300 ${inventoryExpanded
+                                        ? "max-h-[900px] overflow-y-auto pr-2"
+                                        : ""
+                                        }`}
+                                >
+                                    <div className="space-y-4">
+                                        {visibleProducts.map((product) => (
+                                            <ProductInventoryRow
+                                                key={product.documentId || product.id}
+                                                product={product}
+                                                onUpload={() => setSelectedProduct(product)}
+                                                onView={() => handleViewKeys(product)}
+                                            />
+                                        ))}
+
+                                        {selectedProduct && (
+                                            <UploadKeysModal
+                                                product={selectedProduct}
+                                                onClose={() => setSelectedProduct(null)}
+                                                onUpload={(keys) => {
+                                                    console.log(keys);
+                                                }}
+                                            />
+                                        )}
+
+                                        {viewProduct && (
+
+                                            <ViewKeysModal
+                                                product={viewProduct}
+                                                keys={viewKeys}
+                                                onClose={() => {
+                                                    setViewProduct(null);
+                                                    setViewKeys([]);
+                                                }}
+                                                onDelete={(updatedKeys) => {
+
+                                                    setViewKeys(updatedKeys);
+
+                                                    // Update the inventory card
+                                                    setProducts(prev =>
+                                                        prev.map(item => {
+
+                                                            if (item.documentId !== viewProduct.documentId) {
+                                                                return item;
+                                                            }
+
+                                                            const availableKeys =
+                                                                updatedKeys.filter(k => k.isAvailable).length;
+
+                                                            const soldKeys =
+                                                                updatedKeys.length - availableKeys;
+
+                                                            return {
+                                                                ...item,
+                                                                availableKeys,
+                                                                soldKeys,
+                                                            };
+
+                                                        })
+                                                    );
+
+                                                }}
+
+                                            />
+
+                                        )}
+
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
 
-                    </div>
+                        {/* <div className="grid grid-cols-12 gap-5"> */}
 
-                    <div className="grid grid-cols-12 gap-5">
+                            {/* Top Row */}
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <SalesTodayCard amount={salesToday} />
+                            </div>
 
-                        {/* Top Row */}
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <SalesTodayCard amount={salesToday} />
-                        </div>
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <Sales7DaysCard amount={sales7Days} />
+                            </div>
 
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <Sales7DaysCard amount={sales7Days} />
-                        </div>
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <ProfitCard amount={monthlyRevenue} />
+                            </div>
 
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <ProfitCard amount={monthlyRevenue} />
-                        </div>
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <ActiveOffersCard amount={productCount} />
+                            </div>
 
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <ActiveOffersCard amount={productCount} />
-                        </div>
+                            {/* Middle Row */}
+                            <div className="col-span-12 lg:col-span-8">
+                                <SalesChart />
+                            </div>
 
-                        {/* Middle Row */}
-                        <div className="col-span-12 lg:col-span-8">
-                            <SalesChart />
-                        </div>
+                            <div className="col-span-12 lg:col-span-4 space-y-5">
+                                <CategorySales />
+                                {/* <InventoryAlerts /> */}
+                            </div>
 
-                        <div className="col-span-12 lg:col-span-4 space-y-5">
-                            <CategorySales />
-                            {/* <InventoryAlerts /> */}
-                        </div>
-
-                        {/* <div className="col-span-12 lg:col-span-4">
+                            {/* <div className="col-span-12 lg:col-span-4">
                             <WithdrawCard />
                         </div> */}
 
-                        {/* Bottom Row */}
-                        {/* <div className="col-span-12">
+                            {/* Bottom Row */}
+                            {/* <div className="col-span-12">
                             <RecentSalesTable />
                         </div> */}
 
-                        <div className="col-span-12 md:col-span-12 space-y-4">
-                            <OrderChart />
-                            <RefundsChart />
-                        </div>
+                            <div className="col-span-12 md:col-span-12 space-y-4">
+                                <OrderChart />
+                                <RefundsChart />
+                            </div>
 
-                        {/* Order Section Start Here... */}
+                            {/* Order Section Start Here... */}
 
-                        <div className="col-span-12 md:col-span-12">
-                            <div className="bg-[#1d1d1d] rounded-xl border border-white/5 text-white">
-                                <div className="p-4">
+                            <div className="col-span-12 md:col-span-12">
+                                <div className="bg-[#1d1d1d] rounded-xl border border-white/5 text-white">
+                                    <div className="p-4">
 
-                                    {/* HEADER + SEARCH */} {/* and this is work for large screens */}
-                                    <div className="bg-white/5 rounded-xl px-4 py-3 flex items-center gap-4 relative overflow-hidden">
+                                        {/* HEADER + SEARCH */} {/* and this is work for large screens */}
+                                        <div className="bg-white/5 rounded-xl px-4 py-3 flex items-center gap-4 relative overflow-hidden">
 
-                                        {/* LEFT (fixed) */}
-                                        <span className="text-lg sm:text-xl shrink-0">
-                                            <Image src="https://res.cloudinary.com/dblttl9bh/image/upload/v1778325665/Chat_GPT_Image_May_9_2026_04_48_26_PM_1_113ae62610.png" alt="Logo" width={120} height={100} />
-                                        </span>
+                                            {/* LEFT (fixed) */}
+                                            <span className="text-lg sm:text-xl shrink-0">
+                                                <Image src="https://res.cloudinary.com/dblttl9bh/image/upload/v1778325665/Chat_GPT_Image_May_9_2026_04_48_26_PM_1_113ae62610.png" alt="Logo" width={120} height={100} />
+                                            </span>
 
-                                        {/* RIGHT (flexible) */}
-                                        <div className="flex items-center gap-2 flex-1 justify-end">
+                                            {/* RIGHT (flexible) */}
+                                            <div className="flex items-center gap-2 flex-1 justify-end">
 
-                                            {/* SEARCH */}
-                                            <div className={`hidden lg:flex items-center gap-2 transition-all duration-300 ease-in-out ${showSearch ? "flex-1 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
+                                                {/* SEARCH */}
+                                                <div className={`hidden lg:flex items-center gap-2 transition-all duration-300 ease-in-out ${showSearch ? "flex-1 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
+                                                    <input
+                                                        value={search}
+                                                        onChange={(e) => {
+                                                            setPage(1);
+                                                            setSearch(e.target.value);
+                                                        }}
+                                                        placeholder="Search..."
+                                                        className="flex-1 h-[38px] bg-[#1a1a1a] px-3 rounded-lg outline-none text-sm"
+                                                    />
+
+                                                    {/* FILTERS */}
+                                                    <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                                        {["completed", "partial", "pending", "manual"].map((item) => (
+                                                            <button
+                                                                key={item}
+                                                                onClick={() => {
+                                                                    setPage(1);
+                                                                    setStatus(item);
+                                                                }}
+                                                                className={`px-3 py-1 rounded text-xs whitespace-nowrap ${status === item
+                                                                    ? "bg-white text-black"
+                                                                    : "bg-white/5"
+                                                                    }`}
+                                                            >
+                                                                {item}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+
+                                                </div>
+
+                                                {/* TOGGLE */}
+                                                <button
+                                                    onClick={() => setShowSearch(prev => !prev)}
+                                                    className="p-2 rounded-lg bg-white/5 hover:bg-white/20 transition shrink-0"
+                                                >
+                                                    <FaSearch />
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                        {/* this block work on small screens after tap search icon */}
+                                        {/* MOBILE SEARCH (ONLY < lg) */}
+                                        {showSearch && (
+                                            <div className="lg:hidden bg-white/5 rounded-xl p-4 flex flex-col gap-3 mt-3">
+
                                                 <input
                                                     value={search}
                                                     onChange={(e) => {
                                                         setPage(1);
                                                         setSearch(e.target.value);
                                                     }}
-                                                    placeholder="Search..."
-                                                    className="flex-1 h-[38px] bg-[#1a1a1a] px-3 rounded-lg outline-none text-sm"
+                                                    placeholder="Search Order Number..."
+                                                    className="w-full h-[45px] bg-[#2a2a2a] px-4 rounded-lg outline-none"
                                                 />
 
-                                                {/* FILTERS */}
-                                                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                                <div className="flex flex-wrap gap-2">
                                                     {["completed", "partial", "pending", "manual"].map((item) => (
                                                         <button
                                                             key={item}
@@ -632,7 +735,7 @@ export default function Dashboard() {
                                                                 setPage(1);
                                                                 setStatus(item);
                                                             }}
-                                                            className={`px-3 py-1 rounded text-xs whitespace-nowrap ${status === item
+                                                            className={`px-3 py-1 rounded-full text-xs ${status === item
                                                                 ? "bg-white text-black"
                                                                 : "bg-white/5"
                                                                 }`}
@@ -643,288 +746,242 @@ export default function Dashboard() {
                                                 </div>
 
                                             </div>
+                                        )}
 
-                                            {/* TOGGLE */}
-                                            <button
-                                                onClick={() => setShowSearch(prev => !prev)}
-                                                className="p-2 rounded-lg bg-white/5 hover:bg-white/20 transition shrink-0"
-                                            >
-                                                <FaSearch />
-                                            </button>
-
+                                        {/* STATS */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 mb-6">
+                                            <GlassCard title="Total" value={stats.total} />
+                                            <GlassCard title="Pending" value={stats.pending} />
+                                            <GlassCard title="Partial" value={stats.partial} />
+                                            <GlassCard title="Completed" value={stats.completed} />
+                                            <GlassCard title="Manual" value={stats.manual} />
                                         </div>
 
-                                    </div>
+                                        {/* ORDERS */}
+                                        <div className="flex flex-col gap-4">
+                                            {orders.map((order) => {
 
-                                    {/* this block work on small screens after tap search icon */}
-                                    {/* MOBILE SEARCH (ONLY < lg) */}
-                                    {showSearch && (
-                                        <div className="lg:hidden bg-white/5 rounded-xl p-4 flex flex-col gap-3 mt-3">
+                                                const assigned = order.totalKeysAssigned || 0;
+                                                const required = order.totalKeysRequired || 0;
 
-                                            <input
-                                                value={search}
-                                                onChange={(e) => {
-                                                    setPage(1);
-                                                    setSearch(e.target.value);
-                                                }}
-                                                placeholder="Search Order Number..."
-                                                className="w-full h-[45px] bg-[#2a2a2a] px-4 rounded-lg outline-none"
-                                            />
+                                                const percentage =
+                                                    required > 0
+                                                        ? Math.round((assigned / required) * 100)
+                                                        : 0;
 
-                                            <div className="flex flex-wrap gap-2">
-                                                {["completed", "partial", "pending", "manual"].map((item) => (
-                                                    <button
-                                                        key={item}
-                                                        onClick={() => {
-                                                            setPage(1);
-                                                            setStatus(item);
-                                                        }}
-                                                        className={`px-3 py-1 rounded-full text-xs ${status === item
-                                                            ? "bg-white text-black"
-                                                            : "bg-white/5"
-                                                            }`}
-                                                    >
-                                                        {item}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                                const progressColor =
+                                                    order.deliveryStatus === "completed"
+                                                        ? "bg-green-500"
+                                                        : order.deliveryStatus === "partial"
+                                                            ? "bg-yellow-500"
+                                                            : "bg-red-500";
+                                                return (
+                                                    <div key={order.id} className="bg-white/[0.03] border border-white/5 rounded-xl p-6">
 
-                                        </div>
-                                    )}
+                                                        <div className="flex flex-col md:flex-row md:justify-between gap-3">
 
-                                    {/* STATS */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 mb-6">
-                                        <GlassCard title="Total" value={stats.total} />
-                                        <GlassCard title="Pending" value={stats.pending} />
-                                        <GlassCard title="Partial" value={stats.partial} />
-                                        <GlassCard title="Completed" value={stats.completed} />
-                                        <GlassCard title="Manual" value={stats.manual} />
-                                    </div>
+                                                            <div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-gray-500 text-xs uppercase tracking-wider">
+                                                                        Order ID
+                                                                    </span>
+                                                                    <h2 className="text-sm sm:text-base font-semibold cursor-pointer" onClick={() => copyToClipboard(order.orderNumber)}>
+                                                                        {order.orderNumber}
+                                                                    </h2>
 
-                                    {/* ORDERS */}
-                                    <div className="flex flex-col gap-4">
-                                        {orders.map((order) => {
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(order.orderNumber)}
+                                                                        className="text-gray-400 hover:text-white transition"
+                                                                        title="Copy Order Number"
+                                                                    >
+                                                                        <MdContentCopy className="text-lg cursor-pointer" />
+                                                                    </button>
 
-                                            const assigned = order.totalKeysAssigned || 0;
-                                            const required = order.totalKeysRequired || 0;
+                                                                    {copiedValue === order.orderNumber && (
+                                                                        <span className="text-green-400 text-xs">
+                                                                            Copied
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-gray-500 text-xs uppercase tracking-wider">
+                                                                        Order Email
+                                                                    </span>
+                                                                    <p className="text-md sm:text-sm text-gray-300 break-all cursor-pointer" onClick={() => copyToClipboard(order.deliveryEmail)}>
+                                                                        {order.deliveryEmail}
+                                                                    </p>
 
-                                            const percentage =
-                                                required > 0
-                                                    ? Math.round((assigned / required) * 100)
-                                                    : 0;
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(order.deliveryEmail)}
+                                                                        className="text-gray-400 hover:text-white transition"
+                                                                        title="Copy Email"
+                                                                    >
+                                                                        <MdContentCopy className="text-lg cursor-pointer" />
+                                                                    </button>
 
-                                            const progressColor =
-                                                order.deliveryStatus === "completed"
-                                                    ? "bg-green-500"
-                                                    : order.deliveryStatus === "partial"
-                                                        ? "bg-yellow-500"
-                                                        : "bg-red-500";
-                                            return (
-                                                <div key={order.id} className="bg-white/[0.03] border border-white/5 rounded-xl p-6">
+                                                                    {copiedValue === order.deliveryEmail && (
+                                                                        <span className="text-green-400 text-xs">
+                                                                            Copied
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
 
-                                                    <div className="flex flex-col md:flex-row md:justify-between gap-3">
-
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 text-xs uppercase tracking-wider">
-                                                                    Order ID
-                                                                </span>
-                                                                <h2 className="text-sm sm:text-base font-semibold cursor-pointer" onClick={() => copyToClipboard(order.orderNumber)}>
-                                                                    {order.orderNumber}
-                                                                </h2>
-
-                                                                <button
-                                                                    onClick={() => copyToClipboard(order.orderNumber)}
-                                                                    className="text-gray-400 hover:text-white transition"
-                                                                    title="Copy Order Number"
-                                                                >
-                                                                    <MdContentCopy className="text-lg cursor-pointer" />
-                                                                </button>
-
-                                                                {copiedValue === order.orderNumber && (
-                                                                    <span className="text-green-400 text-xs">
-                                                                        Copied
+                                                            <div className="flex flex-wrap gap-5 items-center">
+                                                                {order.manualDeliveryRequired && (
+                                                                    // <span className="text-orange-400 text-md font-semibold">
+                                                                    //     ⚠ Needs Attention
+                                                                    // </span>
+                                                                    <span className="px-3 py-1 rounded-full bg-orange-500/15 text-orange-400 text-sm font-medium">
+                                                                        ⚠ Manual
                                                                     </span>
                                                                 )}
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 text-xs uppercase tracking-wider">
-                                                                    Order Email
+
+                                                                <span className={`py-1 px-2 rounded text-md capitalize ${order.deliveryStatus === "completed" ? "bg-green-500/15 text-green-400" : order.deliveryStatus === "partial" ? "bg-yellow-500/15 text-yellow-400" : "bg-red-500/15 text-red-400"}`}>
+                                                                    {order.deliveryStatus}
                                                                 </span>
-                                                                <p className="text-md sm:text-sm text-gray-300 break-all cursor-pointer" onClick={() => copyToClipboard(order.deliveryEmail)}>
-                                                                    {order.deliveryEmail}
-                                                                </p>
-
-                                                                <button
-                                                                    onClick={() => copyToClipboard(order.deliveryEmail)}
-                                                                    className="text-gray-400 hover:text-white transition"
-                                                                    title="Copy Email"
-                                                                >
-                                                                    <MdContentCopy className="text-lg cursor-pointer" />
-                                                                </button>
-
-                                                                {copiedValue === order.deliveryEmail && (
-                                                                    <span className="text-green-400 text-xs">
-                                                                        Copied
-                                                                    </span>
-                                                                )}
                                                             </div>
+
                                                         </div>
 
-                                                        <div className="flex flex-wrap gap-5 items-center">
-                                                            {order.manualDeliveryRequired && (
-                                                                // <span className="text-orange-400 text-md font-semibold">
-                                                                //     ⚠ Needs Attention
-                                                                // </span>
-                                                                <span className="px-3 py-1 rounded-full bg-orange-500/15 text-orange-400 text-sm font-medium">
-                                                                    ⚠ Manual
-                                                                </span>
-                                                            )}
-
-                                                            <span className={`py-1 px-2 rounded text-md capitalize ${order.deliveryStatus === "completed" ? "bg-green-500/15 text-green-400" : order.deliveryStatus === "partial" ? "bg-yellow-500/15 text-yellow-400" : "bg-red-500/15 text-red-400"}`}>
-                                                                {order.deliveryStatus}
-                                                            </span>
-                                                        </div>
-
-                                                    </div>
-
-                                                    {/* <div className="mt-3 text-sm">
+                                                        {/* <div className="mt-3 text-sm">
                                                         {order.totalKeysAssigned || 0} / {order.totalKeysRequired || 0}
                                                     </div> */}
 
-                                                    <div className="mt-4">
-                                                        <div className="flex justify-between text-xs text-gray-400 mb-2">
-                                                            <span>Delivery Progress</span>
-                                                            <span>{percentage}%</span>
+                                                        <div className="mt-4">
+                                                            <div className="flex justify-between text-xs text-gray-400 mb-2">
+                                                                <span>Delivery Progress</span>
+                                                                <span>{percentage}%</span>
+                                                            </div>
+
+                                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className={`h-full transition-all duration-500 ${progressColor}`}
+                                                                    style={{
+                                                                        width: `${percentage}%`,
+                                                                    }}
+                                                                />
+
+                                                            </div>
+
+
+                                                            <div className="text-xs text-gray-400 mt-2">
+                                                                {assigned} of {required} keys delivered
+                                                            </div>
                                                         </div>
 
-                                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                                            <div
-                                                                className={`h-full transition-all duration-500 ${progressColor}`}
-                                                                style={{
-                                                                    width: `${percentage}%`,
-                                                                }}
-                                                            />
+                                                        <div className="flex flex-wrap gap-2.5 mt-4 text-sm">
 
-                                                        </div>
+                                                            {order.deliveryStatus !== "completed" && (
+                                                                <button
+                                                                    onClick={() => handleSendKeys(order.id)}
+                                                                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                                                                >
+                                                                    Send Keys
+                                                                </button>
+                                                            )}
 
-
-                                                        <div className="text-xs text-gray-400 mt-2">
-                                                            {assigned} of {required} keys delivered
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex flex-wrap gap-2.5 mt-4 text-sm">
-
-                                                        {order.deliveryStatus !== "completed" && (
                                                             <button
-                                                                onClick={() => handleSendKeys(order.id)}
-                                                                className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                                                                onClick={() => setSelectedOrder(order)}
+                                                                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
                                                             >
-                                                                Send Keys
+                                                                Details
                                                             </button>
-                                                        )}
 
-                                                        <button
-                                                            onClick={() => setSelectedOrder(order)}
-                                                            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                                                        >
-                                                            Details
-                                                        </button>
+                                                            <button
+                                                                onClick={() => handleResend(order.id)}
+                                                                className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded"
+                                                            >
+                                                                Resend Key
+                                                            </button>
 
-                                                        <button
-                                                            onClick={() => handleResend(order.id)}
-                                                            className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded"
-                                                        >
-                                                            Resend Key
-                                                        </button>
+                                                            <button
+                                                                onClick={exportOrders}
+                                                                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+                                                            >
+                                                                Export Orders CSV
+                                                            </button>
 
-                                                        <button
-                                                            onClick={exportOrders}
-                                                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
-                                                        >
-                                                            Export Orders CSV
-                                                        </button>
+                                                            <button
+                                                                onClick={() => handleDelete(order.id)}
+                                                                className="bg-red-500/20 hover:bg-red-500/40 text-red-400 py-2 px-4 rounded"
+                                                            >
+                                                                Delete
+                                                            </button>
 
-                                                        <button
-                                                            onClick={() => handleDelete(order.id)}
-                                                            className="bg-red-500/20 hover:bg-red-500/40 text-red-400 py-2 px-4 rounded"
-                                                        >
-                                                            Delete
-                                                        </button>
-
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-
-                                    {/* PAGINATION */}
-                                    <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
-
-                                        {/* PREV */}
-                                        <button
-                                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                                            disabled={page === 1}
-                                            className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
-                                        >
-                                            {/* {"<"} */}
-                                            <MdOutlineKeyboardArrowLeft className="text-2xl" />
-                                        </button>
-
-                                        {/* PAGE NUMBERS */}
-                                        {getPages().map((p, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => typeof p === "number" && setPage(p)}
-                                                disabled={p === "..."}
-                                                className={`px-3 py-1 rounded ${page === p
-                                                    ? "bg-white text-black"
-                                                    : "bg-white/5"
-                                                    } ${p === "..." ? "cursor-default" : ""}`}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
-
-                                        {/* NEXT */}
-                                        <button
-                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                            disabled={page === totalPages}
-                                            className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
-                                        >
-                                            {/* {">"} */}
-                                            <MdOutlineKeyboardArrowRight className="text-2xl" />
-                                        </button>
-
-                                    </div>
-
-                                    {/* MODAL */}
-                                    {selectedOrder && (
-                                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4">
-                                            <div className="bg-white text-black p-4 sm:p-6 rounded-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
-                                                <h2 className="font-bold mb-4">Order Details</h2>
-
-                                                {selectedOrder.assignedKeys?.map((k, i) => (
-                                                    <p key={i}>{k.product} → {k.key}</p>
-                                                ))}
-
-                                                <button onClick={() => setSelectedOrder(null)}>
-                                                    Close
-                                                </button>
-                                            </div>
+                                                )
+                                            })}
                                         </div>
-                                    )}
 
+                                        {/* PAGINATION */}
+                                        <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+
+                                            {/* PREV */}
+                                            <button
+                                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                                disabled={page === 1}
+                                                className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
+                                            >
+                                                {/* {"<"} */}
+                                                <MdOutlineKeyboardArrowLeft className="text-2xl" />
+                                            </button>
+
+                                            {/* PAGE NUMBERS */}
+                                            {getPages().map((p, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => typeof p === "number" && setPage(p)}
+                                                    disabled={p === "..."}
+                                                    className={`px-3 py-1 rounded ${page === p
+                                                        ? "bg-white text-black"
+                                                        : "bg-white/5"
+                                                        } ${p === "..." ? "cursor-default" : ""}`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            ))}
+
+                                            {/* NEXT */}
+                                            <button
+                                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                                disabled={page === totalPages}
+                                                className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
+                                            >
+                                                {/* {">"} */}
+                                                <MdOutlineKeyboardArrowRight className="text-2xl" />
+                                            </button>
+
+                                        </div>
+
+                                        {/* MODAL */}
+                                        {selectedOrder && (
+                                            <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4">
+                                                <div className="bg-white text-black p-4 sm:p-6 rounded-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+                                                    <h2 className="font-bold mb-4">Order Details</h2>
+
+                                                    {selectedOrder.assignedKeys?.map((k, i) => (
+                                                        <p key={i}>{k.product} → {k.key}</p>
+                                                    ))}
+
+                                                    <button onClick={() => setSelectedOrder(null)}>
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+
+                        {/* </div> */}
 
                     </div>
-
                 </div>
+                <ScrollToTopButton />
             </div>
-            <ScrollToTopButton />
-        </>
+        </ >
     );
 }

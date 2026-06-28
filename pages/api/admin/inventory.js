@@ -544,12 +544,22 @@ export default async function handler(req, res) {
 
         giftCards.forEach((giftCard) => {
 
+            const lookupKey = `gift-card:${giftCard.documentId}`;
+
+            console.log("================================");
+            console.log("GIFT CARD:", giftCard.title);
+            console.log("DOCUMENT ID:", giftCard.documentId);
+            console.log("LOOKUP KEY:", lookupKey);
+            console.log("FOUND:", stats[lookupKey]);
+
             const item =
                 stats[`gift-card:${giftCard.documentId}`] || {
                     availableKeys: 0,
                     soldKeys: 0,
                     totalKeys: 0,
                 };
+
+            console.log("ITEM:", item);
 
             totalKeys += item.availableKeys;
 
