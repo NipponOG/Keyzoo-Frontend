@@ -50,15 +50,33 @@ export default function Dashboard() {
 
     const [inventoryExpanded, setInventoryExpanded] = useState(false);
 
+    const [inventorySearch, setInventorySearch] = useState("");
+
     const parentRef = useRef(null);
+    const inventorySearchRef = useRef(null);
+    const orderSearchRef = useRef(null);
 
     // const visibleProducts = inventoryExpanded
     //     ? products
     //     : products.slice(0, 5);
 
+    const filteredProducts = products.filter((product) => {
+
+        const q = inventorySearch.toLowerCase();
+
+        return (
+            product.title?.toLowerCase().includes(q) ||
+            product.documentId?.toLowerCase().includes(q) ||
+            product.region?.toLowerCase().includes(q) ||
+            product.card_region?.toLowerCase().includes(q) ||
+            product.workPlatform?.toLowerCase().includes(q)
+        );
+
+    });
+
     const displayedProducts = inventoryExpanded
-        ? products
-        : products.slice(0, 5);
+        ? filteredProducts
+        : filteredProducts.slice(0, 5);
 
     // const rowVirtualizer = useVirtualizer({
     //     count: displayedProducts.length,
@@ -68,7 +86,7 @@ export default function Dashboard() {
     // });
 
     const rowVirtualizer = useVirtualizer({
-        count: products.length,
+        count: displayedProducts.length,
         getScrollElement: () => parentRef.current,
         estimateSize: () => 320,
         measureElement: (el) => el?.getBoundingClientRect().height ?? 320,
@@ -450,6 +468,99 @@ export default function Dashboard() {
         );
     };
 
+    useEffect(() => {
+
+        const handleKeyDown = (e) => {
+
+            // Ctrl + K
+            if (e.ctrlKey && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                inventorySearchRef.current?.focus();
+            }
+
+            // Ctrl + Shift + F
+            if (
+                e.ctrlKey &&
+                e.shiftKey &&
+                e.key.toLowerCase() === "f"
+            ) {
+                e.preventDefault();
+                setShowSearch(true);
+
+                setTimeout(() => {
+                    orderSearchRef.current?.focus();
+                }, 0);
+            }
+
+            // /
+            if (
+                e.key === "/" &&
+                document.activeElement.tagName !== "INPUT"
+            ) {
+                e.preventDefault();
+                inventorySearchRef.current?.focus();
+            }
+
+            // ESC
+            if (e.key === "Escape") {
+
+                setInventorySearch("");
+                setSearch("");
+
+                inventorySearchRef.current?.blur();
+                orderSearchRef.current?.blur();
+
+                setSelectedProduct(null);
+                setViewProduct(null);
+                setSelectedOrder(null);
+            }
+
+            // Ctrl + I
+            if (
+                e.ctrlKey &&
+                e.key.toLowerCase() === "i"
+            ) {
+                e.preventDefault();
+                setInventoryExpanded(prev => !prev);
+            }
+
+            // Ctrl + E
+            if (
+                e.ctrlKey &&
+                e.key.toLowerCase() === "e"
+            ) {
+                e.preventDefault();
+                exportOrders();
+            }
+
+            // Ctrl + R
+            if (
+                e.ctrlKey &&
+                e.key.toLowerCase() === "r"
+            ) {
+                e.preventDefault();
+                fetchInventory();
+            }
+
+            // Next page
+            if (e.key === "ArrowRight") {
+                setPage(p => Math.min(totalPages, p + 1));
+            }
+
+            // Previous page
+            if (e.key === "ArrowLeft") {
+                setPage(p => Math.max(1, p - 1));
+            }
+
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () =>
+            window.removeEventListener("keydown", handleKeyDown);
+
+    }, [totalPages]);
+
     return (
         <>
             <Head>
@@ -517,7 +628,6 @@ export default function Dashboard() {
                                 <div className="flex items-center justify-between mb-6">
 
                                     <div>
-
                                         <h2 className="text-xl font-semibold text-white">
                                             Product Inventory
                                         </h2>
@@ -525,33 +635,105 @@ export default function Dashboard() {
                                         <p className="text-sm text-gray-400 mt-1">
                                             {products.length} products
                                         </p>
-
                                     </div>
 
-                                    {products.length > 5 && (
+                                    <div className="flex items-center gap-4">
 
-                                        <button
-                                            onClick={() =>
-                                                setInventoryExpanded(!inventoryExpanded)
-                                            }
-                                            className="flex items-center gap-2 rounded-lg border border-[#2b2b2b] bg-[#232323] px-4 py-2 text-sm hover:bg-[#2d2d2d]"
-                                        >
+                                        <div className="flex flex-col">
 
-                                            {inventoryExpanded ? (
-                                                <>
-                                                    <FiChevronUp />
-                                                    Collapse
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <FiChevronDown />
-                                                    View All ({products.length})
-                                                </>
-                                            )}
+                                            <div className="relative">
 
-                                        </button>
+                                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
 
-                                    )}
+                                                <input
+                                                    ref={inventorySearchRef}
+                                                    type="text"
+                                                    placeholder="Search products..."
+                                                    value={inventorySearch}
+                                                    onChange={(e) => setInventorySearch(e.target.value)}
+                                                    className="
+                w-[360px]
+                h-12
+                pl-11
+                pr-20
+                rounded-xl
+                bg-[#232323]
+                border border-[#32343a]
+                text-white
+                placeholder:text-gray-500
+                transition-all
+                duration-200
+                outline-none
+                focus:border-indigo-500
+                focus:ring-2
+                focus:ring-indigo-500/20
+            "
+                                                />
+
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                    <kbd className="rounded-md border border-[#3a3a3a] bg-[#191919] px-2 py-1 text-[10px] text-gray-400">
+                                                        Ctrl K
+                                                    </kbd>
+                                                </div>
+
+                                            </div>
+
+                                            {/* <p className="mt-2 text-xs text-gray-500 flex items-center gap-2">
+                                                <span>Press</span>
+
+                                                <kbd className="rounded border border-[#3a3a3a] bg-[#1b1b1b] px-1.5 py-0.5 text-[10px]">
+                                                    Ctrl
+                                                </kbd>
+
+                                                <span>+</span>
+
+                                                <kbd className="rounded border border-[#3a3a3a] bg-[#1b1b1b] px-1.5 py-0.5 text-[10px]">
+                                                    K
+                                                </kbd>
+
+                                                <span>to search products instantly</span>
+                                            </p> */}
+
+                                        </div>
+
+                                        {products.length > 5 && (
+
+                                            <button
+                                                onClick={() => setInventoryExpanded(!inventoryExpanded)}
+                                                // className="flex items-center gap-2 rounded-lg border border-[#2b2b2b] bg-[#232323] px-4 py-2 hover:bg-[#2d2d2d]"
+                                                className="
+h-12
+px-5
+rounded-xl
+border
+border-[#2b2b2b]
+bg-[#232323]
+hover:bg-[#2d2d2d]
+transition-all
+duration-200
+font-medium
+flex
+items-center
+gap-2
+shadow-lg
+"
+                                            >
+                                                {inventoryExpanded ? (
+                                                    <>
+                                                        <FiChevronUp />
+                                                        Collapse
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FiChevronDown />
+                                                        View All ({filteredProducts.length})
+                                                    </>
+                                                )}
+                                            </button>
+
+                                        )}
+
+                                    </div>
 
                                 </div>
 
@@ -588,7 +770,7 @@ export default function Dashboard() {
                                         >
                                             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
 
-                                                const product = products[virtualRow.index];
+                                                const product = displayedProducts[virtualRow.index];
 
                                                 return (
                                                     <div
@@ -616,7 +798,7 @@ export default function Dashboard() {
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {products.slice(0, 5).map((product) => (
+                                        {displayedProducts.map((product) => (
                                             <ProductInventoryRow
                                                 key={product.documentId}
                                                 product={product}
@@ -746,6 +928,7 @@ export default function Dashboard() {
                                             {/* SEARCH */}
                                             <div className={`hidden lg:flex items-center gap-2 transition-all duration-300 ease-in-out ${showSearch ? "flex-1 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
                                                 <input
+                                                    ref={inventorySearchRef}
                                                     value={search}
                                                     onChange={(e) => {
                                                         setPage(1);
