@@ -10,6 +10,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { useState, useEffect } from "react";
+import adminFetch from "@/lib/adminFetch";
 
 // const data = [
 //     { month: "Jan", refunds: 0 },
@@ -60,18 +61,36 @@ export default function RefundsChart() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const loadChart = async () => {
-            try {
-                const res = await fetch("/api/admin/refunds-chart");
-                const result = await res.json();
 
-                setData(result || []);
+        const loadChart = async () => {
+
+            try {
+
+                const data = await adminFetch("/api/admin/refunds-chart");
+
+                setData(data || []);
+
+            } catch (err) {
+
+                console.error(err);
+
             } finally {
+
                 setLoading(false);
+
             }
+
         };
 
         loadChart();
+
+        const interval = setInterval(
+            loadChart,
+            60000
+        );
+
+        return () => clearInterval(interval);
+
     }, []);
 
     if (loading) {

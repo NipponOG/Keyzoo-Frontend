@@ -2,7 +2,7 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useState, useEffect } from "react";
-import { formatCurrency } from "@/lib/formatCurrency";
+import adminFetch from "@/lib/adminFetch";
 
 // const data = [
 //     { month: "Jan", revenue: 12000 },
@@ -85,16 +85,49 @@ export default function SalesChart() {
     //     return () => clearInterval(interval);
     // }, []);
 
-    useEffect(() => {
-        const loadChart = async () => {
-            try {
-                const res = await fetch("/api/admin/revenue-chart");
-                const result = await res.json();
+    // useEffect(() => {
+    //     const loadChart = async () => {
 
-                setData(result || []);
+    //         try {
+    //             const data = await adminFetch("/api/admin/revenue-chart");
+    //             const result = await res.json();
+
+    //             setData(result || []);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     loadChart();
+
+    //     const interval = setInterval(
+    //         loadChart,
+    //         60000
+    //     );
+
+    //     return () => clearInterval(interval);
+    // }, []);
+
+    useEffect(() => {
+
+        const loadChart = async () => {
+
+            try {
+
+                const data = await adminFetch("/api/admin/revenue-chart");
+
+                setData(data || []);
+
+            } catch (err) {
+
+                console.error(err);
+
             } finally {
+
                 setLoading(false);
+
             }
+
         };
 
         loadChart();
@@ -105,6 +138,7 @@ export default function SalesChart() {
         );
 
         return () => clearInterval(interval);
+
     }, []);
 
     if (loading) {

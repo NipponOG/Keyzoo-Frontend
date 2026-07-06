@@ -1,14 +1,36 @@
+// pages/api/admin/delete-key.js
+
+import verifyAdmin from "@/lib/auth/verifyAdmin";
+
 export default async function handler(req, res) {
 
     if (req.method !== "DELETE") {
         return res.status(405).json({
+            success: false,
             error: "Method not allowed",
+        });
+    }
+
+    // 🔒 Verify Admin
+    const user = await verifyAdmin(req);
+
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            error: "Unauthorized",
         });
     }
 
     try {
 
         const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                error: "Key ID is required",
+            });
+        }
 
         const response = await fetch(
             `${process.env.STRAPI_URL}api/game-keys/${id}`,
@@ -20,21 +42,22 @@ export default async function handler(req, res) {
             }
         );
 
-        console.log("DELETE STATUS:", response.status);
-
-        // Success
         if (response.ok) {
             return res.status(200).json({
                 success: true,
             });
         }
 
-        // Error response (may or may not contain JSON)
         let error = {};
 
         try {
             error = await response.json();
-        } catch (e) { }
+        } catch (_) {
+            error = {
+                success: false,
+                error: "Delete failed",
+            };
+        }
 
         return res.status(response.status).json(error);
 

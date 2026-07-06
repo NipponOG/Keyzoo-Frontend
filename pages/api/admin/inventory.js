@@ -391,8 +391,19 @@
 //     }
 // }
 
+import verifyAdmin from "@/lib/auth/verifyAdmin";
 
 export default async function handler(req, res) {
+
+    const admin = await verifyAdmin(req);
+
+    if (!admin) {
+        return res.status(401).json({
+            success: false,
+            error: "Unauthorized",
+        });
+    }
+
     try {
 
         const headers = {

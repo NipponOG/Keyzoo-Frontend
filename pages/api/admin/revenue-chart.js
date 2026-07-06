@@ -1,7 +1,28 @@
+import verifyAdmin from "@/lib/auth/verifyAdmin";
+
 export default async function handler(req, res) {
+
+    if (req.method !== "GET") {
+        return res.status(405).json({
+            success: false,
+            error: "Method not allowed",
+        });
+    }
+
+    // 🔒 Verify Admin
+    const user = await verifyAdmin(req);
+
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            error: "Unauthorized",
+        });
+    }
+
     try {
+
         const response = await fetch(
-            "http://localhost:1337/api/orders?pagination[pageSize]=1000",
+            `${process.env.STRAPI_URL}api/orders?pagination[pageSize]=5000`,
             {
                 headers: {
                     Authorization: `Bearer ${process.env.STRAPI_API_TOKEN}`,
@@ -10,6 +31,11 @@ export default async function handler(req, res) {
         );
 
         const data = await response.json();
+
+        if (!response.ok) {
+            return res.status(response.status).json(data);
+        }
+
         const orders = data.data || [];
 
         const months = [
@@ -24,6 +50,7 @@ export default async function handler(req, res) {
         });
 
         orders.forEach(order => {
+
             if (order.paymentStatus !== "paid") return;
 
             const date = new Date(order.createdAt);
@@ -37,10 +64,17 @@ export default async function handler(req, res) {
             revenue: revenueMap[month]
         }));
 
-        res.status(200).json(chartData);
+        return res.status(200).json(chartData);
 
     } catch (err) {
+
         console.error(err);
-        res.status(500).json({ error: "Failed" });
+
+        return res.status(500).json({
+            success: false,
+            error: "Failed",
+        });
+
     }
+
 }

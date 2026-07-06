@@ -5,7 +5,7 @@ import SalesChart from "@/components/dashboard/SalesChart";
 import OrderChart from "@/components/dashboard/OrderChart";
 import RefundsChart from "@/components/dashboard/RefundsChart";
 import CategorySales from "@/components/dashboard/CategorySales";
-import InventoryAlerts from "@/components/dashboard/InventoryAlerts";
+import AdminGuard from "@/components/admin/AdminGuard";
 import Sales7DaysCard from "@/components/dashboard/Sales7DaysCard";
 import ProfitCard from "@/components/dashboard/ProfitCard";
 import ActiveOffersCard from "@/components/dashboard/ActiveOffersCard";
@@ -23,6 +23,7 @@ import Image from "next/image";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef } from "react";
+import adminFetch from "@/lib/adminFetch";
 
 export default function Dashboard() {
 
@@ -103,58 +104,87 @@ export default function Dashboard() {
 
     const [selectedProduct, setSelectedProduct] = useState(null);
 
+    // const fetchOrders = async () => {
+
+    //     const token = localStorage.getItem("jwt");
+
+    //     const params = new URLSearchParams({
+    //         "pagination[page]": page,
+    //         "pagination[pageSize]": 10,
+    //         "filters[orderNumber][$containsi]": search || "",
+    //     });
+
+    //     if (status === "manual") {
+    //         params.append("filters[manualDeliveryRequired][$eq]", true);
+    //     } else if (status) {
+    //         params.append("filters[deliveryStatus][$eq]", status);
+    //     }
+
+    //     const res = await fetch(
+    //         `${STRAPI_URL}api/orders?${params.toString()}`,
+    //         {
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`,
+    //             },
+    //         }
+    //     );
+
+    //     const data = await res.json();
+    //     setOrders(data.data || []);
+    //     setTotalPages(data.meta?.pagination?.pageCount || 1);
+    // };
+
     const fetchOrders = async () => {
 
-        const token = localStorage.getItem("jwt");
+        try {
 
-        const params = new URLSearchParams({
-            "pagination[page]": page,
-            "pagination[pageSize]": 10,
-            "filters[orderNumber][$containsi]": search || "",
-        });
+            const params = new URLSearchParams({
+                page,
+                pageSize: 10,
+                search,
+                status,
+            });
 
-        if (status === "manual") {
-            params.append("filters[manualDeliveryRequired][$eq]", true);
-        } else if (status) {
-            params.append("filters[deliveryStatus][$eq]", status);
+            const data = await adminFetch(
+                `/api/admin/orders?${params.toString()}`
+            );
+
+            setOrders(data.data || []);
+            setTotalPages(data.meta?.pagination?.pageCount || 1);
+
+        } catch (err) {
+
+            console.error(err);
+
         }
 
-        const res = await fetch(
-            `${STRAPI_URL}api/orders?${params.toString()}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-
-        const data = await res.json();
-        setOrders(data.data || []);
-        setTotalPages(data.meta?.pagination?.pageCount || 1);
     };
 
     const fetchProductsCount = async () => {
-        const res = await fetch("/api/admin/products-count");
-        const data = await res.json();
+
+        const data = await adminFetch("/api/admin/products-count");
 
         setProductCount(data.total || 0);
     };
 
     const fetchDashboardStats = async () => {
-        const token = localStorage.getItem("jwt");
 
-        const res = await fetch(
-            `${STRAPI_URL}api/orders?pagination[pageSize]=5000`,  // if need use 5 insted of 10
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
+        // const token = localStorage.getItem("jwt");
 
-        const data = await res.json();
+        // const res = await fetch(
+        //     `${STRAPI_URL}api/orders?pagination[pageSize]=5000`,  // if need use 5 insted of 10
+        //     {
+        //         headers: {
+        //             Authorization: `Bearer ${token}`,
+        //         },
+        //     }
+        // );
+
+        const data = await adminFetch("/api/admin/dashboard");
 
         setDashboardOrders(data.data || []);
+        // setDashboardStats(data.stats);  
+        // setDashboardOrders(data.orders);
     };
 
     useEffect(() => {
@@ -221,61 +251,91 @@ export default function Dashboard() {
 
     // }, [page, search, status]);
 
-    useEffect(() => {
-        const token = localStorage.getItem("jwt");
-        const user = JSON.parse(localStorage.getItem("user"));
+    // useEffect(() => {
+    //     const token = localStorage.getItem("jwt");
+    //     const user = JSON.parse(localStorage.getItem("user"));
 
-        if (!token || !user) {
-            window.location.href = "/sign-in";
-        }
-    }, []);
+    //     if (!token || !user) {
+    //         window.location.href = "/sign-in";
+    //     }
+    // }, []);
+
+    // const handleSendKeys = async (orderId) => {
+    //     setLoadingId(orderId);
+    //     const token = localStorage.getItem("jwt");
+
+    //     await fetch(`${STRAPI_URL}api/orders/manual-send`, {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             Authorization: `Bearer ${token}`,
+    //         },
+    //         body: JSON.stringify({ orderId }),
+    //     });
+
+    //     await fetchOrders();
+    //     await fetchDashboardStats();
+
+    //     setLoadingId(null);
+    // };
 
     const handleSendKeys = async (orderId) => {
-        setLoadingId(orderId);
-        const token = localStorage.getItem("jwt");
 
-        await fetch(`${STRAPI_URL}api/orders/manual-send`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ orderId }),
-        });
+        try {
 
-        await fetchOrders();
-        await fetchDashboardStats();
+            setLoadingId(orderId);
 
-        setLoadingId(null);
+            await adminFetch("/api/admin/manual-send", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    orderId,
+                }),
+            });
+
+            await fetchOrders();
+            await fetchDashboardStats();
+
+        } catch (err) {
+
+            alert(err.message);
+
+        } finally {
+
+            setLoadingId(null);
+
+        }
+
     };
 
     const handleResend = async (orderId) => {
-        const token = localStorage.getItem("jwt");
 
-        await fetch(`${STRAPI_URL}api/orders/resend`, {
+        await adminFetch("/api/admin/resend-order", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ orderId }),
+            body: JSON.stringify({
+                orderId,
+            }),
         });
     };
 
     const handleDelete = async (orderId) => {
-        const token = localStorage.getItem("jwt");
 
-        await fetch(`${STRAPI_URL}api/orders/delete`, {
+        await adminFetch("/api/admin/delete-order", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ orderId }),
         });
 
         await fetchOrders();
         await fetchDashboardStats();
+
     };
 
     // const handleInvoice = async (orderId) => {
@@ -418,8 +478,16 @@ export default function Dashboard() {
     // };
 
     const fetchInventory = async () => {
-        const res = await fetch("/api/admin/inventory");
-        const data = await res.json();
+
+        // const token = localStorage.getItem("jwt");
+
+        // const res = await fetch("/api/admin/inventory", {
+        //     headers: {
+        //         Authorization: `Bearer ${token}`,
+        //     },
+        // });
+
+        const data = await adminFetch("/api/admin/inventory");
 
         setInventory({
             totalProducts: data.totalProducts,
@@ -451,21 +519,54 @@ export default function Dashboard() {
 
         setViewProduct(product);
 
-        const res = await fetch(
+        // const res = await fetch(
+        //     `/api/admin/view-keys?productId=${product.documentId || product.id}&type=${product.type}`
+        // );
+
+        const data = await adminFetch(
             `/api/admin/view-keys?productId=${product.documentId || product.id}&type=${product.type}`
         );
 
-        const data = await res.json();
+        // const data = await res.json();
 
         setViewKeys(data.keys || []);
 
     };
 
-    const exportOrders = () => {
-        window.open(
-            "/api/admin/export-orders",
-            "_blank"
-        );
+    // const exportOrders = () => {
+    //     window.open(
+    //         "/api/admin/export-orders",
+    //         "_blank"
+    //     );
+    // };
+
+    const handleExport = async () => {
+
+        const token = localStorage.getItem("jwt");
+
+        const response = await fetch("/api/admin/export-orders", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const blob = await response.blob();
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+
+        a.href = url;
+        a.download = `orders-${Date.now()}.csv`;
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        a.remove();
+
+        window.URL.revokeObjectURL(url);
+
     };
 
     useEffect(() => {
@@ -530,7 +631,7 @@ export default function Dashboard() {
                 e.key.toLowerCase() === "e"
             ) {
                 e.preventDefault();
-                exportOrders();
+                handleExport();
             }
 
             // Ctrl + R
@@ -562,96 +663,97 @@ export default function Dashboard() {
     }, [totalPages]);
 
     return (
-        <>
-            <Head>
-                <title>Keyzoo Analytics</title>
-            </Head>
+        <AdminGuard>
+            <>
+                <Head>
+                    <title>Keyzoo Analytics</title>
+                </Head>
 
-            <div className="min-h-screen p-6">
-                <div className="max-w-[1700px] mx-auto px-8 space-y-6">
+                <div className="min-h-screen p-6">
+                    <div className="max-w-[1700px] mx-auto px-8 space-y-6">
 
-                    <div className="mb-6">
-                        <h1 className="text-4xl font-bold text-white">
-                            Welcome back, Nippan 👋
-                        </h1>
+                        <div className="mb-6">
+                            <h1 className="text-4xl font-bold text-white">
+                                Welcome back, Nippan 👋
+                            </h1>
 
-                        <p className="text-gray-400 mt-2">
-                            Here's what's happening with your store today.
-                        </p>
-                    </div>
-
-                    {/* <MetricCards /> */}
-                    <div className="grid grid-cols-12 gap-5">
-
-                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
-                            <InventoryCard
-                                title="Available Keys"
-                                value={inventory.totalKeys}
-                                color="green"
-                            />
-
+                            <p className="text-gray-400 mt-2">
+                                Here's what's happening with your store today.
+                            </p>
                         </div>
 
-                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
-                            <InventoryCard
-                                title="Low Stock"
-                                value={inventory.lowStock}
-                                color="yellow"
-                            />
-                        </div>
+                        {/* <MetricCards /> */}
+                        <div className="grid grid-cols-12 gap-5">
 
-                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
-                            <InventoryCard
-                                title="Out Of Stock"
-                                value={inventory.outOfStock}
-                                color="red"
-                            />
-                        </div>
+                            <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                                <InventoryCard
+                                    title="Available Keys"
+                                    value={inventory.totalKeys}
+                                    color="green"
+                                />
 
-                        <div className="col-span-12 md:col-span-4 xl:col-span-3">
-                            <InventoryCard
-                                title="Products Tracked"
-                                value={inventory.totalProducts}
-                                color="blue"
-                            />
-                        </div>
+                            </div>
 
-                        <div className="col-span-12">
-                            <InventoryAlerts />
-                        </div>
+                            <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                                <InventoryCard
+                                    title="Low Stock"
+                                    value={inventory.lowStock}
+                                    color="yellow"
+                                />
+                            </div>
 
-                        <div className="col-span-12">
+                            <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                                <InventoryCard
+                                    title="Out Of Stock"
+                                    value={inventory.outOfStock}
+                                    color="red"
+                                />
+                            </div>
 
-                            {/* Product Featch */}
-                            <div className="rounded-2xl border border-[#23262d] bg-[#1b1b1b] p-6">
+                            <div className="col-span-12 md:col-span-4 xl:col-span-3">
+                                <InventoryCard
+                                    title="Products Tracked"
+                                    value={inventory.totalProducts}
+                                    color="blue"
+                                />
+                            </div>
 
-                                <div className="flex items-center justify-between mb-6">
+                            <div className="col-span-12">
+                                {/* <InventoryAlerts /> */}
+                            </div>
 
-                                    <div>
-                                        <h2 className="text-xl font-semibold text-white">
-                                            Product Inventory
-                                        </h2>
+                            <div className="col-span-12">
 
-                                        <p className="text-sm text-gray-400 mt-1">
-                                            {products.length} products
-                                        </p>
-                                    </div>
+                                {/* Product Featch */}
+                                <div className="rounded-2xl border border-[#23262d] bg-[#1b1b1b] p-6">
 
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center justify-between mb-6">
 
-                                        <div className="flex flex-col">
+                                        <div>
+                                            <h2 className="text-xl font-semibold text-white">
+                                                Product Inventory
+                                            </h2>
 
-                                            <div className="relative">
+                                            <p className="text-sm text-gray-400 mt-1">
+                                                {products.length} products
+                                            </p>
+                                        </div>
 
-                                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+                                        <div className="flex items-center gap-4">
 
-                                                <input
-                                                    ref={inventorySearchRef}
-                                                    type="text"
-                                                    placeholder="Search products..."
-                                                    value={inventorySearch}
-                                                    onChange={(e) => setInventorySearch(e.target.value)}
-                                                    className="
+                                            <div className="flex flex-col">
+
+                                                <div className="relative">
+
+                                                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+
+                                                    <input
+                                                        ref={inventorySearchRef}
+                                                        type="text"
+                                                        placeholder="Search products..."
+                                                        value={inventorySearch}
+                                                        onChange={(e) => setInventorySearch(e.target.value)}
+                                                        className="
                 w-[360px]
                 h-12
                 pl-11
@@ -668,17 +770,17 @@ export default function Dashboard() {
                 focus:ring-2
                 focus:ring-indigo-500/20
             "
-                                                />
+                                                    />
 
-                                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                    <kbd className="rounded-md border border-[#3a3a3a] bg-[#191919] px-2 py-1 text-[10px] text-gray-400">
-                                                        Ctrl K
-                                                    </kbd>
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                        <kbd className="rounded-md border border-[#3a3a3a] bg-[#191919] px-2 py-1 text-[10px] text-gray-400">
+                                                            Ctrl K
+                                                        </kbd>
+                                                    </div>
+
                                                 </div>
 
-                                            </div>
-
-                                            {/* <p className="mt-2 text-xs text-gray-500 flex items-center gap-2">
+                                                {/* <p className="mt-2 text-xs text-gray-500 flex items-center gap-2">
                                                 <span>Press</span>
 
                                                 <kbd className="rounded border border-[#3a3a3a] bg-[#1b1b1b] px-1.5 py-0.5 text-[10px]">
@@ -694,14 +796,14 @@ export default function Dashboard() {
                                                 <span>to search products instantly</span>
                                             </p> */}
 
-                                        </div>
+                                            </div>
 
-                                        {products.length > 5 && (
+                                            {products.length > 5 && (
 
-                                            <button
-                                                onClick={() => setInventoryExpanded(!inventoryExpanded)}
-                                                // className="flex items-center gap-2 rounded-lg border border-[#2b2b2b] bg-[#232323] px-4 py-2 hover:bg-[#2d2d2d]"
-                                                className="
+                                                <button
+                                                    onClick={() => setInventoryExpanded(!inventoryExpanded)}
+                                                    // className="flex items-center gap-2 rounded-lg border border-[#2b2b2b] bg-[#232323] px-4 py-2 hover:bg-[#2d2d2d]"
+                                                    className="
 h-12
 px-5
 rounded-xl
@@ -717,27 +819,27 @@ items-center
 gap-2
 shadow-lg
 "
-                                            >
-                                                {inventoryExpanded ? (
-                                                    <>
-                                                        <FiChevronUp />
-                                                        Collapse
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FiChevronDown />
-                                                        View All ({filteredProducts.length})
-                                                    </>
-                                                )}
-                                            </button>
+                                                >
+                                                    {inventoryExpanded ? (
+                                                        <>
+                                                            <FiChevronUp />
+                                                            Collapse
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FiChevronDown />
+                                                            View All ({filteredProducts.length})
+                                                        </>
+                                                    )}
+                                                </button>
 
-                                        )}
+                                            )}
+
+                                        </div>
 
                                     </div>
 
-                                </div>
-
-                                {/* <div
+                                    {/* <div
                                     className={`space-y-4 ${inventoryExpanded
                                         ? "max-h-[70vh] overflow-y-auto pr-2"
                                         : ""
@@ -756,190 +858,238 @@ shadow-lg
                                     </div>
                                 </div> */}
 
-                                {inventoryExpanded ? (
-                                    <div
-                                        ref={parentRef}
-                                        className="max-h-[70vh] overflow-y-auto scroll-smooth pr-2"
-                                    >
+                                    {inventoryExpanded ? (
                                         <div
-                                            style={{
-                                                height: `${rowVirtualizer.getTotalSize()}px`,
-                                                width: "100%",
-                                                position: "relative",
-                                            }}
+                                            ref={parentRef}
+                                            className="max-h-[70vh] overflow-y-auto scroll-smooth pr-2"
                                         >
-                                            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                            <div
+                                                style={{
+                                                    height: `${rowVirtualizer.getTotalSize()}px`,
+                                                    width: "100%",
+                                                    position: "relative",
+                                                }}
+                                            >
+                                                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
 
-                                                const product = displayedProducts[virtualRow.index];
+                                                    const product = displayedProducts[virtualRow.index];
 
-                                                return (
-                                                    <div
-                                                        key={product.documentId}
-                                                        ref={rowVirtualizer.measureElement}
-                                                        data-index={virtualRow.index}
-                                                        className="pb-4"
-                                                        style={{
-                                                            position: "absolute",
-                                                            top: 0,
-                                                            left: 0,
-                                                            width: "100%",
-                                                            transform: `translateY(${virtualRow.start}px)`,
-                                                        }}
-                                                    >
-                                                        <ProductInventoryRow
-                                                            product={product}
-                                                            onUpload={() => setSelectedProduct(product)}
-                                                            onView={() => handleViewKeys(product)}
-                                                        />
-                                                    </div>
-                                                );
-                                            })}
+                                                    return (
+                                                        <div
+                                                            key={product.documentId}
+                                                            ref={rowVirtualizer.measureElement}
+                                                            data-index={virtualRow.index}
+                                                            className="pb-4"
+                                                            style={{
+                                                                position: "absolute",
+                                                                top: 0,
+                                                                left: 0,
+                                                                width: "100%",
+                                                                transform: `translateY(${virtualRow.start}px)`,
+                                                            }}
+                                                        >
+                                                            <ProductInventoryRow
+                                                                product={product}
+                                                                onUpload={() => setSelectedProduct(product)}
+                                                                onView={() => handleViewKeys(product)}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {displayedProducts.map((product) => (
-                                            <ProductInventoryRow
-                                                key={product.documentId}
-                                                product={product}
-                                                onUpload={() => setSelectedProduct(product)}
-                                                onView={() => handleViewKeys(product)}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {displayedProducts.map((product) => (
+                                                <ProductInventoryRow
+                                                    key={product.documentId}
+                                                    product={product}
+                                                    onUpload={() => setSelectedProduct(product)}
+                                                    onView={() => handleViewKeys(product)}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
 
-                                {selectedProduct && (
-                                    <UploadKeysModal
-                                        product={selectedProduct}
-                                        onClose={() => setSelectedProduct(null)}
-                                        onUpload={(keys) => {
-                                            console.log(keys);
-                                        }}
-                                    />
-                                )}
+                                    {selectedProduct && (
+                                        <UploadKeysModal
+                                            product={selectedProduct}
+                                            onClose={() => setSelectedProduct(null)}
+                                            onUpload={(keys) => {
+                                                console.log(keys);
+                                            }}
+                                        />
+                                    )}
 
-                                {viewProduct && (
+                                    {viewProduct && (
 
-                                    <ViewKeysModal
-                                        product={viewProduct}
-                                        keys={viewKeys}
-                                        onClose={() => {
-                                            setViewProduct(null);
-                                            setViewKeys([]);
-                                        }}
-                                        onDelete={(updatedKeys) => {
+                                        <ViewKeysModal
+                                            product={viewProduct}
+                                            keys={viewKeys}
+                                            onClose={() => {
+                                                setViewProduct(null);
+                                                setViewKeys([]);
+                                            }}
+                                            onDelete={(updatedKeys) => {
 
-                                            setViewKeys(updatedKeys);
+                                                setViewKeys(updatedKeys);
 
-                                            // Update the inventory card
-                                            setProducts(prev =>
-                                                prev.map(item => {
+                                                // Update the inventory card
+                                                setProducts(prev =>
+                                                    prev.map(item => {
 
-                                                    if (item.documentId !== viewProduct.documentId) {
-                                                        return item;
-                                                    }
+                                                        if (item.documentId !== viewProduct.documentId) {
+                                                            return item;
+                                                        }
 
-                                                    const availableKeys =
-                                                        updatedKeys.filter(k => k.isAvailable).length;
+                                                        const availableKeys =
+                                                            updatedKeys.filter(k => k.isAvailable).length;
 
-                                                    const soldKeys =
-                                                        updatedKeys.length - availableKeys;
+                                                        const soldKeys =
+                                                            updatedKeys.length - availableKeys;
 
-                                                    return {
-                                                        ...item,
-                                                        availableKeys,
-                                                        soldKeys,
-                                                    };
+                                                        return {
+                                                            ...item,
+                                                            availableKeys,
+                                                            soldKeys,
+                                                        };
 
-                                                })
-                                            );
+                                                    })
+                                                );
 
-                                        }}
+                                            }}
 
-                                    />
+                                        />
 
-                                )}
+                                    )}
+
+                                </div>
 
                             </div>
 
-                        </div>
+                            {/* <div className="grid grid-cols-12 gap-5"> */}
 
-                        {/* <div className="grid grid-cols-12 gap-5"> */}
+                            {/* Top Row */}
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <SalesTodayCard amount={salesToday} />
+                            </div>
 
-                        {/* Top Row */}
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <SalesTodayCard amount={salesToday} />
-                        </div>
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <Sales7DaysCard amount={sales7Days} />
+                            </div>
 
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <Sales7DaysCard amount={sales7Days} />
-                        </div>
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <ProfitCard amount={monthlyRevenue} />
+                            </div>
 
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <ProfitCard amount={monthlyRevenue} />
-                        </div>
+                            <div className="col-span-12 md:col-span-6 xl:col-span-3">
+                                <ActiveOffersCard amount={productCount} />
+                            </div>
 
-                        <div className="col-span-12 md:col-span-6 xl:col-span-3">
-                            <ActiveOffersCard amount={productCount} />
-                        </div>
+                            {/* Middle Row */}
+                            <div className="col-span-12 lg:col-span-8">
+                                <SalesChart />
+                            </div>
 
-                        {/* Middle Row */}
-                        <div className="col-span-12 lg:col-span-8">
-                            <SalesChart />
-                        </div>
+                            <div className="col-span-12 lg:col-span-4 space-y-5">
+                                <CategorySales />
+                                {/* <InventoryAlerts /> */}
+                            </div>
 
-                        <div className="col-span-12 lg:col-span-4 space-y-5">
-                            <CategorySales />
-                            {/* <InventoryAlerts /> */}
-                        </div>
-
-                        {/* <div className="col-span-12 lg:col-span-4">
+                            {/* <div className="col-span-12 lg:col-span-4">
                             <WithdrawCard />
                         </div> */}
 
-                        {/* Bottom Row */}
-                        {/* <div className="col-span-12">
+                            {/* Bottom Row */}
+                            {/* <div className="col-span-12">
                             <RecentSalesTable />
                         </div> */}
 
-                        <div className="col-span-12 md:col-span-12 space-y-4">
-                            <OrderChart />
-                            <RefundsChart />
-                        </div>
+                            <div className="col-span-12 md:col-span-12 space-y-4">
+                                <OrderChart />
+                                <RefundsChart />
+                            </div>
 
-                        {/* Order Section Start Here... */}
+                            {/* Order Section Start Here... */}
 
-                        <div className="col-span-12 md:col-span-12">
-                            <div className="bg-[#1d1d1d] rounded-xl border border-white/5 text-white">
-                                <div className="p-4">
+                            <div className="col-span-12 md:col-span-12">
+                                <div className="bg-[#1d1d1d] rounded-xl border border-white/5 text-white">
+                                    <div className="p-4">
 
-                                    {/* HEADER + SEARCH */} {/* and this is work for large screens */}
-                                    <div className="bg-white/5 rounded-xl px-4 py-3 flex items-center gap-4 relative overflow-hidden">
+                                        {/* HEADER + SEARCH */} {/* and this is work for large screens */}
+                                        <div className="bg-white/5 rounded-xl px-4 py-3 flex items-center gap-4 relative overflow-hidden">
 
-                                        {/* LEFT (fixed) */}
-                                        <span className="text-lg sm:text-xl shrink-0">
-                                            <Image src="https://res.cloudinary.com/dblttl9bh/image/upload/v1778325665/Chat_GPT_Image_May_9_2026_04_48_26_PM_1_113ae62610.png" alt="Logo" width={120} height={100} />
-                                        </span>
+                                            {/* LEFT (fixed) */}
+                                            <span className="text-lg sm:text-xl shrink-0">
+                                                <Image src="https://res.cloudinary.com/dblttl9bh/image/upload/v1778325665/Chat_GPT_Image_May_9_2026_04_48_26_PM_1_113ae62610.png" alt="Logo" width={120} height={100} />
+                                            </span>
 
-                                        {/* RIGHT (flexible) */}
-                                        <div className="flex items-center gap-2 flex-1 justify-end">
+                                            {/* RIGHT (flexible) */}
+                                            <div className="flex items-center gap-2 flex-1 justify-end">
 
-                                            {/* SEARCH */}
-                                            <div className={`hidden lg:flex items-center gap-2 transition-all duration-300 ease-in-out ${showSearch ? "flex-1 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
+                                                {/* SEARCH */}
+                                                <div className={`hidden lg:flex items-center gap-2 transition-all duration-300 ease-in-out ${showSearch ? "flex-1 opacity-100" : "w-0 opacity-0 overflow-hidden"}`}>
+                                                    <input
+                                                        // ref={inventorySearchRef}
+                                                        ref={orderSearchRef}
+                                                        value={search}
+                                                        onChange={(e) => {
+                                                            setPage(1);
+                                                            setSearch(e.target.value);
+                                                        }}
+                                                        placeholder="Search..."
+                                                        className="flex-1 h-[38px] bg-[#1a1a1a] px-3 rounded-lg outline-none text-sm"
+                                                    />
+
+                                                    {/* FILTERS */}
+                                                    <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                                        {["completed", "partial", "pending", "manual"].map((item) => (
+                                                            <button
+                                                                key={item}
+                                                                onClick={() => {
+                                                                    setPage(1);
+                                                                    setStatus(item);
+                                                                }}
+                                                                className={`px-3 py-1 rounded text-xs whitespace-nowrap ${status === item
+                                                                    ? "bg-white text-black"
+                                                                    : "bg-white/5"
+                                                                    }`}
+                                                            >
+                                                                {item}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+
+                                                </div>
+
+                                                {/* TOGGLE */}
+                                                <button
+                                                    onClick={() => setShowSearch(prev => !prev)}
+                                                    className="p-2 rounded-lg bg-white/5 hover:bg-white/20 transition shrink-0"
+                                                >
+                                                    <FaSearch />
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                        {/* this block work on small screens after tap search icon */}
+                                        {/* MOBILE SEARCH (ONLY < lg) */}
+                                        {showSearch && (
+                                            <div className="lg:hidden bg-white/5 rounded-xl p-4 flex flex-col gap-3 mt-3">
+
                                                 <input
-                                                    ref={inventorySearchRef}
                                                     value={search}
                                                     onChange={(e) => {
                                                         setPage(1);
                                                         setSearch(e.target.value);
                                                     }}
-                                                    placeholder="Search..."
-                                                    className="flex-1 h-[38px] bg-[#1a1a1a] px-3 rounded-lg outline-none text-sm"
+                                                    placeholder="Search Order Number..."
+                                                    className="w-full h-[45px] bg-[#2a2a2a] px-4 rounded-lg outline-none"
                                                 />
 
-                                                {/* FILTERS */}
-                                                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                                                <div className="flex flex-wrap gap-2">
                                                     {["completed", "partial", "pending", "manual"].map((item) => (
                                                         <button
                                                             key={item}
@@ -947,7 +1097,7 @@ shadow-lg
                                                                 setPage(1);
                                                                 setStatus(item);
                                                             }}
-                                                            className={`px-3 py-1 rounded text-xs whitespace-nowrap ${status === item
+                                                            className={`px-3 py-1 rounded-full text-xs ${status === item
                                                                 ? "bg-white text-black"
                                                                 : "bg-white/5"
                                                                 }`}
@@ -958,289 +1108,243 @@ shadow-lg
                                                 </div>
 
                                             </div>
+                                        )}
 
-                                            {/* TOGGLE */}
-                                            <button
-                                                onClick={() => setShowSearch(prev => !prev)}
-                                                className="p-2 rounded-lg bg-white/5 hover:bg-white/20 transition shrink-0"
-                                            >
-                                                <FaSearch />
-                                            </button>
-
+                                        {/* STATS */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 mb-6">
+                                            <GlassCard title="Total" value={stats.total} />
+                                            <GlassCard title="Pending" value={stats.pending} />
+                                            <GlassCard title="Partial" value={stats.partial} />
+                                            <GlassCard title="Completed" value={stats.completed} />
+                                            <GlassCard title="Manual" value={stats.manual} />
                                         </div>
 
-                                    </div>
+                                        {/* ORDERS */}
+                                        <div className="flex flex-col gap-4">
+                                            {orders.map((order) => {
 
-                                    {/* this block work on small screens after tap search icon */}
-                                    {/* MOBILE SEARCH (ONLY < lg) */}
-                                    {showSearch && (
-                                        <div className="lg:hidden bg-white/5 rounded-xl p-4 flex flex-col gap-3 mt-3">
+                                                const assigned = order.totalKeysAssigned || 0;
+                                                const required = order.totalKeysRequired || 0;
 
-                                            <input
-                                                value={search}
-                                                onChange={(e) => {
-                                                    setPage(1);
-                                                    setSearch(e.target.value);
-                                                }}
-                                                placeholder="Search Order Number..."
-                                                className="w-full h-[45px] bg-[#2a2a2a] px-4 rounded-lg outline-none"
-                                            />
+                                                const percentage =
+                                                    required > 0
+                                                        ? Math.round((assigned / required) * 100)
+                                                        : 0;
 
-                                            <div className="flex flex-wrap gap-2">
-                                                {["completed", "partial", "pending", "manual"].map((item) => (
-                                                    <button
-                                                        key={item}
-                                                        onClick={() => {
-                                                            setPage(1);
-                                                            setStatus(item);
-                                                        }}
-                                                        className={`px-3 py-1 rounded-full text-xs ${status === item
-                                                            ? "bg-white text-black"
-                                                            : "bg-white/5"
-                                                            }`}
-                                                    >
-                                                        {item}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                                const progressColor =
+                                                    order.deliveryStatus === "completed"
+                                                        ? "bg-green-500"
+                                                        : order.deliveryStatus === "partial"
+                                                            ? "bg-yellow-500"
+                                                            : "bg-red-500";
+                                                return (
+                                                    <div key={order.id} className="bg-white/[0.03] border border-white/5 rounded-xl p-6">
 
-                                        </div>
-                                    )}
+                                                        <div className="flex flex-col md:flex-row md:justify-between gap-3">
 
-                                    {/* STATS */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6 mb-6">
-                                        <GlassCard title="Total" value={stats.total} />
-                                        <GlassCard title="Pending" value={stats.pending} />
-                                        <GlassCard title="Partial" value={stats.partial} />
-                                        <GlassCard title="Completed" value={stats.completed} />
-                                        <GlassCard title="Manual" value={stats.manual} />
-                                    </div>
+                                                            <div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-gray-500 text-xs uppercase tracking-wider">
+                                                                        Order ID
+                                                                    </span>
+                                                                    <h2 className="text-sm sm:text-base font-semibold cursor-pointer" onClick={() => copyToClipboard(order.orderNumber)}>
+                                                                        {order.orderNumber}
+                                                                    </h2>
 
-                                    {/* ORDERS */}
-                                    <div className="flex flex-col gap-4">
-                                        {orders.map((order) => {
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(order.orderNumber)}
+                                                                        className="text-gray-400 hover:text-white transition"
+                                                                        title="Copy Order Number"
+                                                                    >
+                                                                        <MdContentCopy className="text-lg cursor-pointer" />
+                                                                    </button>
 
-                                            const assigned = order.totalKeysAssigned || 0;
-                                            const required = order.totalKeysRequired || 0;
+                                                                    {copiedValue === order.orderNumber && (
+                                                                        <span className="text-green-400 text-xs">
+                                                                            Copied
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-gray-500 text-xs uppercase tracking-wider">
+                                                                        Order Email
+                                                                    </span>
+                                                                    <p className="text-md sm:text-sm text-gray-300 break-all cursor-pointer" onClick={() => copyToClipboard(order.deliveryEmail)}>
+                                                                        {order.deliveryEmail}
+                                                                    </p>
 
-                                            const percentage =
-                                                required > 0
-                                                    ? Math.round((assigned / required) * 100)
-                                                    : 0;
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(order.deliveryEmail)}
+                                                                        className="text-gray-400 hover:text-white transition"
+                                                                        title="Copy Email"
+                                                                    >
+                                                                        <MdContentCopy className="text-lg cursor-pointer" />
+                                                                    </button>
 
-                                            const progressColor =
-                                                order.deliveryStatus === "completed"
-                                                    ? "bg-green-500"
-                                                    : order.deliveryStatus === "partial"
-                                                        ? "bg-yellow-500"
-                                                        : "bg-red-500";
-                                            return (
-                                                <div key={order.id} className="bg-white/[0.03] border border-white/5 rounded-xl p-6">
+                                                                    {copiedValue === order.deliveryEmail && (
+                                                                        <span className="text-green-400 text-xs">
+                                                                            Copied
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
 
-                                                    <div className="flex flex-col md:flex-row md:justify-between gap-3">
-
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 text-xs uppercase tracking-wider">
-                                                                    Order ID
-                                                                </span>
-                                                                <h2 className="text-sm sm:text-base font-semibold cursor-pointer" onClick={() => copyToClipboard(order.orderNumber)}>
-                                                                    {order.orderNumber}
-                                                                </h2>
-
-                                                                <button
-                                                                    onClick={() => copyToClipboard(order.orderNumber)}
-                                                                    className="text-gray-400 hover:text-white transition"
-                                                                    title="Copy Order Number"
-                                                                >
-                                                                    <MdContentCopy className="text-lg cursor-pointer" />
-                                                                </button>
-
-                                                                {copiedValue === order.orderNumber && (
-                                                                    <span className="text-green-400 text-xs">
-                                                                        Copied
+                                                            <div className="flex flex-wrap gap-5 items-center">
+                                                                {order.manualDeliveryRequired && (
+                                                                    // <span className="text-orange-400 text-md font-semibold">
+                                                                    //     ⚠ Needs Attention
+                                                                    // </span>
+                                                                    <span className="px-3 py-1 rounded-full bg-orange-500/15 text-orange-400 text-sm font-medium">
+                                                                        ⚠ Manual
                                                                     </span>
                                                                 )}
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 text-xs uppercase tracking-wider">
-                                                                    Order Email
+
+                                                                <span className={`py-1 px-2 rounded text-md capitalize ${order.deliveryStatus === "completed" ? "bg-green-500/15 text-green-400" : order.deliveryStatus === "partial" ? "bg-yellow-500/15 text-yellow-400" : "bg-red-500/15 text-red-400"}`}>
+                                                                    {order.deliveryStatus}
                                                                 </span>
-                                                                <p className="text-md sm:text-sm text-gray-300 break-all cursor-pointer" onClick={() => copyToClipboard(order.deliveryEmail)}>
-                                                                    {order.deliveryEmail}
-                                                                </p>
-
-                                                                <button
-                                                                    onClick={() => copyToClipboard(order.deliveryEmail)}
-                                                                    className="text-gray-400 hover:text-white transition"
-                                                                    title="Copy Email"
-                                                                >
-                                                                    <MdContentCopy className="text-lg cursor-pointer" />
-                                                                </button>
-
-                                                                {copiedValue === order.deliveryEmail && (
-                                                                    <span className="text-green-400 text-xs">
-                                                                        Copied
-                                                                    </span>
-                                                                )}
                                                             </div>
+
                                                         </div>
 
-                                                        <div className="flex flex-wrap gap-5 items-center">
-                                                            {order.manualDeliveryRequired && (
-                                                                // <span className="text-orange-400 text-md font-semibold">
-                                                                //     ⚠ Needs Attention
-                                                                // </span>
-                                                                <span className="px-3 py-1 rounded-full bg-orange-500/15 text-orange-400 text-sm font-medium">
-                                                                    ⚠ Manual
-                                                                </span>
-                                                            )}
-
-                                                            <span className={`py-1 px-2 rounded text-md capitalize ${order.deliveryStatus === "completed" ? "bg-green-500/15 text-green-400" : order.deliveryStatus === "partial" ? "bg-yellow-500/15 text-yellow-400" : "bg-red-500/15 text-red-400"}`}>
-                                                                {order.deliveryStatus}
-                                                            </span>
-                                                        </div>
-
-                                                    </div>
-
-                                                    {/* <div className="mt-3 text-sm">
+                                                        {/* <div className="mt-3 text-sm">
                                                         {order.totalKeysAssigned || 0} / {order.totalKeysRequired || 0}
                                                     </div> */}
 
-                                                    <div className="mt-4">
-                                                        <div className="flex justify-between text-xs text-gray-400 mb-2">
-                                                            <span>Delivery Progress</span>
-                                                            <span>{percentage}%</span>
+                                                        <div className="mt-4">
+                                                            <div className="flex justify-between text-xs text-gray-400 mb-2">
+                                                                <span>Delivery Progress</span>
+                                                                <span>{percentage}%</span>
+                                                            </div>
+
+                                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className={`h-full transition-all duration-500 ${progressColor}`}
+                                                                    style={{
+                                                                        width: `${percentage}%`,
+                                                                    }}
+                                                                />
+
+                                                            </div>
+
+
+                                                            <div className="text-xs text-gray-400 mt-2">
+                                                                {assigned} of {required} keys delivered
+                                                            </div>
                                                         </div>
 
-                                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                                            <div
-                                                                className={`h-full transition-all duration-500 ${progressColor}`}
-                                                                style={{
-                                                                    width: `${percentage}%`,
-                                                                }}
-                                                            />
+                                                        <div className="flex flex-wrap gap-2.5 mt-4 text-sm">
 
-                                                        </div>
+                                                            {order.deliveryStatus !== "completed" && (
+                                                                <button
+                                                                    onClick={() => handleSendKeys(order.id)}
+                                                                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                                                                >
+                                                                    Send Keys
+                                                                </button>
+                                                            )}
 
-
-                                                        <div className="text-xs text-gray-400 mt-2">
-                                                            {assigned} of {required} keys delivered
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex flex-wrap gap-2.5 mt-4 text-sm">
-
-                                                        {order.deliveryStatus !== "completed" && (
                                                             <button
-                                                                onClick={() => handleSendKeys(order.id)}
-                                                                className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+                                                                onClick={() => setSelectedOrder(order)}
+                                                                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
                                                             >
-                                                                Send Keys
+                                                                Details
                                                             </button>
-                                                        )}
 
-                                                        <button
-                                                            onClick={() => setSelectedOrder(order)}
-                                                            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                                                        >
-                                                            Details
-                                                        </button>
+                                                            <button
+                                                                onClick={() => handleResend(order.id)}
+                                                                className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded"
+                                                            >
+                                                                Resend Key
+                                                            </button>
 
-                                                        <button
-                                                            onClick={() => handleResend(order.id)}
-                                                            className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded"
-                                                        >
-                                                            Resend Key
-                                                        </button>
+                                                            <button
+                                                                onClick={handleExport}
+                                                                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+                                                            >
+                                                                Export Orders CSV
+                                                            </button>
 
-                                                        <button
-                                                            onClick={exportOrders}
-                                                            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
-                                                        >
-                                                            Export Orders CSV
-                                                        </button>
+                                                            <button
+                                                                onClick={() => handleDelete(order.id)}
+                                                                className="bg-red-500/20 hover:bg-red-500/40 text-red-400 py-2 px-4 rounded"
+                                                            >
+                                                                Delete
+                                                            </button>
 
-                                                        <button
-                                                            onClick={() => handleDelete(order.id)}
-                                                            className="bg-red-500/20 hover:bg-red-500/40 text-red-400 py-2 px-4 rounded"
-                                                        >
-                                                            Delete
-                                                        </button>
-
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-
-                                    {/* PAGINATION */}
-                                    <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
-
-                                        {/* PREV */}
-                                        <button
-                                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                                            disabled={page === 1}
-                                            className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
-                                        >
-                                            {/* {"<"} */}
-                                            <MdOutlineKeyboardArrowLeft className="text-2xl" />
-                                        </button>
-
-                                        {/* PAGE NUMBERS */}
-                                        {getPages().map((p, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => typeof p === "number" && setPage(p)}
-                                                disabled={p === "..."}
-                                                className={`px-3 py-1 rounded ${page === p
-                                                    ? "bg-white text-black"
-                                                    : "bg-white/5"
-                                                    } ${p === "..." ? "cursor-default" : ""}`}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
-
-                                        {/* NEXT */}
-                                        <button
-                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                            disabled={page === totalPages}
-                                            className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
-                                        >
-                                            {/* {">"} */}
-                                            <MdOutlineKeyboardArrowRight className="text-2xl" />
-                                        </button>
-
-                                    </div>
-
-                                    {/* MODAL */}
-                                    {selectedOrder && (
-                                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4">
-                                            <div className="bg-white text-black p-4 sm:p-6 rounded-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
-                                                <h2 className="font-bold mb-4">Order Details</h2>
-
-                                                {selectedOrder.assignedKeys?.map((k, i) => (
-                                                    <p key={i}>{k.product} → {k.key}</p>
-                                                ))}
-
-                                                <button onClick={() => setSelectedOrder(null)}>
-                                                    Close
-                                                </button>
-                                            </div>
+                                                )
+                                            })}
                                         </div>
-                                    )}
 
+                                        {/* PAGINATION */}
+                                        <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+
+                                            {/* PREV */}
+                                            <button
+                                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                                disabled={page === 1}
+                                                className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
+                                            >
+                                                {/* {"<"} */}
+                                                <MdOutlineKeyboardArrowLeft className="text-2xl" />
+                                            </button>
+
+                                            {/* PAGE NUMBERS */}
+                                            {getPages().map((p, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => typeof p === "number" && setPage(p)}
+                                                    disabled={p === "..."}
+                                                    className={`px-3 py-1 rounded ${page === p
+                                                        ? "bg-white text-black"
+                                                        : "bg-white/5"
+                                                        } ${p === "..." ? "cursor-default" : ""}`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            ))}
+
+                                            {/* NEXT */}
+                                            <button
+                                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                                disabled={page === totalPages}
+                                                className="px-1.5 py-1.5 rounded bg-white/5 disabled:opacity-40"
+                                            >
+                                                {/* {">"} */}
+                                                <MdOutlineKeyboardArrowRight className="text-2xl" />
+                                            </button>
+
+                                        </div>
+
+                                        {/* MODAL */}
+                                        {selectedOrder && (
+                                            <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4">
+                                                <div className="bg-white text-black p-4 sm:p-6 rounded-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+                                                    <h2 className="font-bold mb-4">Order Details</h2>
+
+                                                    {selectedOrder.assignedKeys?.map((k, i) => (
+                                                        <p key={i}>{k.product} → {k.key}</p>
+                                                    ))}
+
+                                                    <button onClick={() => setSelectedOrder(null)}>
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* </div> */}
+
                         </div>
-
-                        {/* </div> */}
-
                     </div>
+                    <ScrollToTopButton />
                 </div>
-                <ScrollToTopButton />
-            </div>
-        </ >
+            </ >
+        </AdminGuard>
     );
 }

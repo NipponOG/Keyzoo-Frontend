@@ -13,6 +13,7 @@ import {
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/getStrapiMedia";
 import { useEffect } from "react";
+import adminFetch from "@/lib/adminFetch";
 
 export default function ViewKeysModal({
     product,
@@ -68,35 +69,42 @@ export default function ViewKeysModal({
 
         if (!ok) return;
 
-        const res = await fetch(
-            "/api/admin/delete-key",
-            {
+        try {
+
+            const data = await adminFetch("/api/admin/delete-key", {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ id }),
+                body: JSON.stringify({
+                    id,
+                }),
+            });
+
+            if (!data.success) {
+                alert("Delete failed");
+                return;
             }
-        );
 
-        const data = await res.json();
+            setLocalKeys(prev => {
 
-        if (!data.success) {
-            alert("Delete failed");
-            return;
+                const updated = prev.filter(
+                    key => key.id !== id
+                );
+
+                onDelete?.(updated);
+
+                return updated;
+
+            });
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert(err.message);
+
         }
-
-        // setLocalKeys(prev =>
-        //     prev.filter(k => k.id !== id)
-        // );
-
-        setLocalKeys(prev => {
-            const updated = prev.filter(k => k.id !== id);
-
-            onDelete?.(updated);
-
-            return updated;
-        });
 
     };
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import adminFetch from "@/lib/adminFetch";
 
 export default function CategorySales() {
 
@@ -18,11 +19,10 @@ export default function CategorySales() {
     useEffect(() => {
         const loadCategories = async () => {
 
-            const res = await fetch(
-                "/api/admin/category-sales"
-            );
+            const data = await adminFetch("/api/admin/category-sales");
 
-            const data = await res.json();
+            console.log("CATEGORY API:", data);
+            console.log("Array?", Array.isArray(data));
 
             setCategories(data || []);
         };

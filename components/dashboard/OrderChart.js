@@ -2,6 +2,7 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useState, useEffect } from "react";
+import adminFetch from "@/lib/adminFetch";
 
 // const data = [
 //     { month: "Jan", orders: 120 },
@@ -49,18 +50,36 @@ export default function OrderChart() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const loadChart = async () => {
-            try {
-                const res = await fetch("/api/admin/order-chart");
-                const result = await res.json();
 
-                setData(result || []);
+        const loadChart = async () => {
+
+            try {
+
+                const data = await adminFetch("/api/admin/order-chart");
+
+                setData(data || []);
+
+            } catch (err) {
+
+                console.error(err);
+
             } finally {
+
                 setLoading(false);
+
             }
+
         };
 
         loadChart();
+
+        const interval = setInterval(
+            loadChart,
+            60000
+        );
+
+        return () => clearInterval(interval);
+
     }, []);
 
     if (loading) {

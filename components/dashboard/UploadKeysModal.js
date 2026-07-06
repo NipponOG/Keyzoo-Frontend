@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { FiUpload, FiX, FiFileText, FiClipboard, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import Image from "next/image";
 import { getStrapiMedia } from "@/lib/getStrapiMedia";
+import adminFetch from "@/lib/adminFetch";
 
 export default function UploadKeysModal({
     product,
@@ -128,13 +129,56 @@ export default function UploadKeysModal({
     //     }
     // };
 
+    // const handleUpload = async (keys) => {
+
+    //     try {
+
+    //         setUploading(true);
+
+    //         const res = await adminFetch("/api/admin/upload-keys", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({
+    //                 type: product.inventoryType,
+    //                 productId: product.id,
+    //                 type: product.type,
+    //                 keys,
+    //             }),
+    //         });
+
+    //         const data = await res.json();
+
+    //         if (!res.ok) {
+    //             throw new Error(data.error || "Upload failed");
+    //         }
+
+    //         alert(
+    //             `${data.uploaded} keys uploaded\n${data.duplicates} duplicates skipped`
+    //         );
+
+    //         onClose();
+
+    //     } catch (err) {
+
+    //         alert(err.message);
+
+    //     } finally {
+
+    //         setUploading(false);
+
+    //     }
+
+    // };
+
     const handleUpload = async (keys) => {
 
         try {
 
             setUploading(true);
 
-            const res = await fetch("/api/admin/upload-keys", {
+            const data = await adminFetch("/api/admin/upload-keys", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -142,16 +186,9 @@ export default function UploadKeysModal({
                 body: JSON.stringify({
                     type: product.inventoryType,
                     productId: product.id,
-                    type: product.type,
                     keys,
                 }),
             });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || "Upload failed");
-            }
 
             alert(
                 `${data.uploaded} keys uploaded\n${data.duplicates} duplicates skipped`
@@ -170,6 +207,7 @@ export default function UploadKeysModal({
         }
 
     };
+
     return (
 
         <div className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">

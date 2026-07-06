@@ -1,16 +1,29 @@
+import verifyAdmin from "@/lib/auth/verifyAdmin";
+
 export default async function handler(req, res) {
+
     if (req.method !== "POST") {
-        return res.status(405).json({ error: "Method not allowed" });
+        return res.status(405).json({ success: false, error: "Method not allowed" });
+    }
+
+    // 🔒 Verify Admin
+    const user = await verifyAdmin(req);
+
+    if (!user) {
+        return res.status(401).json({
+            success: false,
+            error: "Unauthorized",
+        });
     }
 
     const { orderId } = req.body;
 
     if (!orderId) {
-        return res.status(400).json({ error: "Order ID required" });
+        return res.status(400).json({ success: false, error: "Order ID required" });
     }
 
     try {
-        const response = await fetch("http://localhost:1337/api/orders/manual-send", {
+        const response = await fetch(`${process.env.STRAPI_URL}api/orders/manual-send`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -21,8 +34,17 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        return res.status(200).json(data);
+        // return res.status(200).json(data);
+        return res.status(response.status).json(data);
+
     } catch (err) {
-        return res.status(500).json({ error: "Internal server error" });
+
+        console.error(err);
+
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error",
+        });
+
     }
 }

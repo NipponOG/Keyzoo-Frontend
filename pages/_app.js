@@ -20,6 +20,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import TermlyCMP from '@/components/TermlyCMP'
 import { Onest } from 'next/font/google';
+import { AdminProvider } from "@/context/AdminContext";
 
 const onest = Onest({ subsets: ['latin'] });
 
@@ -129,28 +130,30 @@ export default function MyApp({ Component, pageProps }) {
         {/* <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /> */}
         {/* <link href="https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap" rel="stylesheet" /> */}
         {/* </Head> */}
-        <ThemeProvider attribute="class">
-          <TermlyCMP websiteUUID={WEBSITE_UUID} />
-          {/* <SessionProvider session={session}> */}
-          <AuthProvider>
-            <Provider store={store}>
-              <CartLoader>
-                {pageLoading && <PageLoader />}
-                <SkeletonTheme baseColor="#202020" highlightColor="#444">
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <main className="flex-grow">
-                      <Component {...pageProps} />
-                      <Toaster position="top-right" />
-                    </main>
-                    <Footer />
-                  </div>
-                </SkeletonTheme>
-              </CartLoader>
-            </Provider>
-          </AuthProvider>
-          {/* </SessionProvider> */}
-        </ThemeProvider>
+        <AdminProvider>
+          <ThemeProvider attribute="class">
+            <TermlyCMP websiteUUID={WEBSITE_UUID} />
+            {/* <SessionProvider session={session}> */}
+            <AuthProvider>
+              <Provider store={store}>
+                <CartLoader>
+                  {pageLoading && <PageLoader />}
+                  <SkeletonTheme baseColor="#202020" highlightColor="#444">
+                    <div className="flex flex-col min-h-screen">
+                      <Header />
+                      <main className="flex-grow">
+                        <Component {...pageProps} />
+                        <Toaster position="top-right" />
+                      </main>
+                      <Footer />
+                    </div>
+                  </SkeletonTheme>
+                </CartLoader>
+              </Provider>
+            </AuthProvider>
+            {/* </SessionProvider> */}
+          </ThemeProvider>
+        </AdminProvider>
       </main>
     </>
   );
