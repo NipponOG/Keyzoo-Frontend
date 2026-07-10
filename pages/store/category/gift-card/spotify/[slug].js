@@ -1,6 +1,5 @@
 import Image from "next/image";
-import React from "react";
-import { useState, useEffect } from "react";
+import { React, useState, useEffect, useMemo, useRef } from "react";
 import { IoStarHalfSharp, IoStarSharp } from "react-icons/io5";
 import { FaNoteSticky } from "react-icons/fa6";
 import { FaGlobeAmericas, FaMemory } from 'react-icons/fa';
@@ -25,25 +24,35 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from "swiper/modules"; // ✅ import Navigation
 import "swiper/css/navigation"; // ✅ import navigation styles
 import ErrorPage from "next/error";
+import { addRecentlyViewed } from "@/utils/recentlyViewed";
+import { getStrapiMedia } from "@/lib/media";
+import HoverCard from "@/components/HoverCard";
 
 
 
 export async function getServerSideProps({ params }) {
+
     const { slug } = params;
 
-    const res = await fetchFromStrapi(`api/spotify-gift-cards?filters[slug][$eq]=${slug}&populate=*`);
-    // const res = await fetchFromStrapi(`api/products?filters[slug][$eq]=${slug}&populate=*`);
-    const product = res.data[0] || null;
-    // const variations = product?.variations || [];
+    const productRes = await fetchFromStrapi(
+        `api/gift-cards?filters[slug][$eq]=${slug}&populate=*`
+    );
+
+    const regionsRes = await fetchFromStrapi(
+        `api/regions` // 👈 your region collection
+    );
 
     return {
         props: {
-            product,
+            product: productRes?.data?.[0] || null,
+            regionsData: regionsRes?.data || [],
         },
     };
 }
 
-export default function ProductPage({ product }) {
+export default function ProductPage({ product, regionsData }) {
+
+    const Type = "spotify";     // As slug page parent folder are hardcoded psn so we can set type psn here. We directly inject it here...
 
     // Destructure minimum and recommended requirements safely and languages also...
     const minimumRequirements = product?.minimumRequirement || {};
@@ -52,14 +61,45 @@ export default function ProductPage({ product }) {
     const Interface = product?.interface_language || {};
     const Subtitles = product?.subtitles_language || {};
     const Tags = product?.game_tag_seo || [];
-    const relatedProducts = product?.relatedProducts || [];
+    const [ageimage, setAgeimage] = useState(); // Default to true
 
-    // Destructure variations safely
-    // const [selectedVariation, setSelectedVariation] = useState(
-    //     variations?.length > 0 ? variations[0] : null
+    // if use this 1286ms but if not 4773ms
+    const relatedProducts = product?.relatedProducts || [];
+    const relatedRegionProducts = product?.relatedRegionProducts || [];
+
+    const allEditions = [product, ...relatedProducts];
+
+
+    // const relatedProducts = (product?.relatedProducts || []).filter(
+    //     (p) => p && p.slug
     // );
 
-    const [ageimage, setAgeimage] = useState(); // Default to true
+    // const relatedRegionProducts = (product?.relatedRegionProducts || []).filter(
+    //     (p) => p && p.slug
+    // );
+
+    // const allEditions = [product, ...relatedProducts].filter(
+    //     (p) => p && p.slug
+    // );
+
+    const uniqueEditions = Array.from(
+        new Map(allEditions.map((p) => [p.slug, p])).values()
+    );
+
+    const allVariants = useMemo(
+        () =>
+            [product, ...relatedProducts, ...relatedRegionProducts].filter(
+                (p) => p && p.slug
+            ),
+        [product, relatedProducts, relatedRegionProducts]
+    );
+
+
+    const [regionOpen, setRegionOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const [regions, setRegions] = useState([]);
+    const [selectedRegion, setSelectedRegion] = useState(null);
+    const dropdownRef = useRef(null);
 
     // // Option 1: Show based on environment variable
     // useEffect(() => {
@@ -67,9 +107,27 @@ export default function ProductPage({ product }) {
     //     setAgeimage(process.env.NEXT_PUBLIC_SHOW_AGEIMAGE === 'true');
     // }, []);
 
+    const filteredRegions = regions
+        .filter((region) =>
+            region.toLowerCase().includes(search.toLowerCase())
+        )
+        .filter((region) =>
+            allVariants.some(
+                (p) =>
+                    p.region?.toLowerCase() === region.toLowerCase() &&
+                    p.var_title === product.var_title
+            )
+        );
+
     const dispatch = useDispatch();
     const router = useRouter();
     const [selectedSlug, setSelectedSlug] = useState(router.query.slug);
+    const [loading, setLoading] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+
+    const visibleEditions = expanded
+        ? uniqueEditions
+        : uniqueEditions.slice(0, 5);
 
     // update selectedSlug when slug changes in URL
     useEffect(() => {
@@ -82,14 +140,29 @@ export default function ProductPage({ product }) {
         dispatch(addToCart({
             id: product.id,
             title: product.title,
-            region: product.region,
             // gift_tag: product.item,
             item_type_gift: product.item_type,
             price: product.discountPrice,
+            region: product.region,
             image: imgUrl,
             // add more if you want
         }));
         toast.success("Added to cart!");
+    };
+
+    const handleBuyNow = () => {
+        setLoading(true);
+        dispatch(addToCart({
+            id: product.id,
+            title: product.title,
+            // game_tag: product.item,
+            item_type_game: product.item_type,
+            price: product.discountPrice,
+            region: product.region,
+            image: imgUrl,
+            // add more if you want
+        }));
+        router.push('/checkout');
     };
 
     const { symbol } = useCurrency();
@@ -103,34 +176,83 @@ export default function ProductPage({ product }) {
 
     if (!product) return null;
 
-    // const { attributes } = product;
-    // const imageUrl = attributes?.image?.data?.attributes?.url
-    //   ? `${process.env.NEXT_PUBLIC_STRAPI_IMAGE_URL}${attributes.image.data.attributes.url}`
-    //   : null;
+    useEffect(() => {
+        if (!product) return;
 
-    const getStrapiMedia = (url) => {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `${process.env.NEXT_PUBLIC_STRAPI_IMAGE_URL}${url}`;
-    };
+        addRecentlyViewed({
+            id: product.id,
+            title: product.title,
+            slug: product.slug,
+            type: Type,
+            image: product.image,
+            price: product.price,
+            discountPrice: product.discountPrice,
+            platform: product.platform,
+            card_region: product.card_region,
+            Available: product.Available,
+        });
+    }, [product]);
+
+    // handle click outside for region dropdown
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setRegionOpen(false);
+                setSearch("");
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const imgUrl = getStrapiMedia(product.image?.url);
     const age = getStrapiMedia(product.age?.url);
     const platform = getStrapiMedia(product.platform_image?.url);
 
-    // const discountPercent = Math.round(
-    //   100 - (product.price / product.discountPrice) * 100
-    // );
-
     const discountPercent = Math.round(
         ((product.price - product.discountPrice) / product.price) * 100
     );
 
+    useEffect(() => {
+        if (!allVariants.length) return;
+
+        const regionSet = new Set(
+            allVariants.map((p) => p.region).filter(Boolean)
+        );
+
+        setRegions(Array.from(regionSet));
+        setSelectedRegion(product.region || null);
+    }, [product, allVariants]);
+
+    const handleRegionChange = (region) => {
+        if (region === product.region) return;
+
+        const currentEdition = product.var_title;
+
+        const matched = allVariants.find(
+            (p) =>
+                p.region?.toLowerCase() === region.toLowerCase() &&
+                p.var_title === currentEdition
+        );
+
+        if (matched) {
+            router.push(`/product/${matched.slug}`);
+        } else {
+            toast("This combination is not available");
+        }
+
+        setRegionOpen(false);
+    };
 
     return (
         <div className="min-h-screen p-4 lg:p-6">
             <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[260px_1fr_380px] gap-4 lg:gap-6 xl:gap-8">
-
 
                 {/* Left: Cover Image - Fixed width for laptop and up */}
                 <div className="w-full md:w-[260px] flex justify-center mx-auto">
@@ -189,11 +311,13 @@ export default function ProductPage({ product }) {
                             {/* <div className="bg-white dark:bg-[#1a1a1a] p-3 rounded-xl text-white"> */}
                             <div className="h-[56px] w-[56px] border border-[#e7e7e7] bg-white dark:bg-amber-500 rounded-xl flex items-center justify-center">
                                 {/* <SlCheck className="text-xl text-[#1cc54c]" /> */}
-                                <Image src={'/tick.svg'} height={26} width={26} />
+                                <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
+                                    <use xlinkHref="/sprit/icons.svg#green-tick"></use>
+                                </svg>
                             </div>
                             <div>
                                 <p className="text-xs lg:text-sm">
-                                    Can be activated in <strong>India</strong>
+                                    Can be activated in <strong>{product.region}</strong>
                                 </p>
                                 <a href="#" className="text-[#359dff] text-xs">Check Restrictions</a>
                             </div>
@@ -223,11 +347,11 @@ export default function ProductPage({ product }) {
                                     <path d="M25.8815 18.6765H22.0481L21.4404 14.8549L19.1939 18.6497H18.7739C18.5188 18.2104 18.4179 17.5673 18.4179 17.1735C18.4179 16.5206 18.4648 15.8841 18.4648 15.0556C18.4648 13.9568 18.1418 13.367 17.28 13.1598V13.1273C19.1131 12.8724 19.9444 11.6595 19.9444 9.95193C19.9444 7.52591 18.3306 7 16.2156 7H10.525L8.12012 18.3882H11.1442L12.0193 14.2444H14.0294C15.1019 14.2444 15.5402 14.7691 15.5402 15.7732C15.5402 16.537 15.4606 17.1417 15.4606 17.7298C15.4606 17.9477 15.51 18.4535 15.6568 18.6497C15.6553 18.6497 17.8426 20.9562 17.8426 20.9562L15.9622 25L19.9844 22.6102L22.9816 24.9127L22.4221 21.0977L25.8815 18.6765ZM14.9332 12.1124H12.5296L13.1054 9.36687H15.3417C16.1379 9.36687 16.9661 9.57399 16.9661 10.5484C16.9661 11.7766 16.0228 12.1124 14.9332 12.1124Z" fill="black" />
                                     <path d="M20.0264 21.9386L17.225 23.6018L18.5072 20.848L16.948 19.2058H19.512L21.1338 16.4658L21.573 19.233H24.1166L21.8235 20.8376L22.2332 23.6353L20.0264 21.9386Z" fill="white" />
                                 </svg> */}
-                                <Image src={platform} height={26} width={26} />
+                                <Image src={platform} height={40} width={40} />
                             </div>
                             <div>
                                 <p className="text-xs lg:text-sm">
-                                    Platform: <strong>Rockstar Games</strong>
+                                    Platform: <strong>{product.workPlatform}</strong>
                                 </p>
                                 <a href="#" className="text-[#359dff] text-xs">Activation Guide</a>
                             </div>
@@ -250,69 +374,196 @@ export default function ProductPage({ product }) {
 
                     <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div>
 
-                    {relatedProducts.length > 0 && (<div className="mt-4 lg:mt-6">
+                    {/* Region Selector */} {/* i will show it for dekstop only */}
+                    <div className="flex items-center gap-4 mt-4">
+                        <span className="text-sm text-gray-400">
+                            Region
+                        </span>
+                        <div ref={dropdownRef} className="relative w-[340px]">
+
+                            {/* Trigger */}
+                            <button
+                                onClick={() => setRegionOpen(!regionOpen)}
+                                className="w-full bg-[#1a1a1a] border border-[#2e2e2e] text-white px-4 py-2 rounded-lg flex items-center justify-between h-[25px] lg:h-[50px]"
+                            >
+                                <span className="text-sm uppercase">
+                                    {selectedRegion || "Select Region"}
+                                </span>
+
+                                <svg
+                                    className={`w-4 h-4 transition-transform ${regionOpen ? "rotate-180" : ""}`}
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                >
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </button>
+
+                            {/* Dropdown */}
+                            {regionOpen && (
+                                <div className="absolute z-50 mt-2 w-full bg-[#2a2a2a] rounded-xl shadow-2xl border border-white/10">
+
+                                    {/* Search */}
+                                    <div className="p-3 border-b border-white/10">
+                                        <input
+                                            autoFocus
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            placeholder="Search region..."
+                                            className="w-full bg-[#1f1f1f] text-white text-sm px-3 py-2 rounded-md outline-none"
+                                        />
+                                    </div>
+
+                                    {/* Options */}
+                                    <div className="max-h-[220px] overflow-y-auto no-scrollbar">
+                                        {filteredRegions.length > 0 ? (
+                                            filteredRegions.map((region) => (
+                                                <button
+                                                    key={region}
+                                                    onClick={() => {
+                                                        handleRegionChange(region);
+                                                        setSearch("");
+                                                    }}
+                                                    className={`w-full text-left px-4 py-3 text-sm transition
+                  ${selectedRegion === region
+                                                            ? "bg-[#3a3a3a] text-white"
+                                                            : "text-white/90 hover:bg-[#3a3a3a]"
+                                                        }
+                `}
+                                                >
+                                                    {region.toUpperCase()}
+                                                    {/* {selectedRegion === region && (
+                            <span className="text-green-400">✓</span>
+                          )} */}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-3 text-sm text-white/50">
+                                                No region found
+                                            </div>
+                                        )}
+                                    </div>
+
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div>
+
+                    {product.var_title && (<div className="mt-4 lg:mt-6">
                         <h3 className="text-xs lg:text-sm text-white/60 mb-2">Edition:</h3>
 
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            {/* Option 1 */}
-                            {relatedProducts?.map((product) => (
-                                <label key={product.slug} className="w-full sm:w-[200px] cursor-pointer select-none">
-                                    <input
-                                        type="radio"
-                                        name="edition"
-                                        value={product.slug}
-                                        className="peer sr-only"
-                                        // checked={router.query.slug === product.slug}
-                                        // onChange={() => router.push(`/gift-card/${product.slug}`)}
-                                        checked={selectedSlug === product.slug}
-                                        onChange={() => {
-                                            setSelectedSlug(product.slug);
-                                            router.push(`/store/category/psn/${product.slug}`);
-                                        }}
-                                    // defaultChecked
-                                    />
-                                    <div className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm font-semibold text-white">{product.var_title}</span>
-                                            {/* <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div> */}
-                                        </div>
-                                        <div className="mt-1 text-sm text-white/50">from {symbol}{product.discountPrice}</div>
-                                    </div>
-                                </label>
-                            ))}
+                        {/* <div className="flex flex-col sm:flex-row gap-3"> */}
+                        <div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 items-stretch justify-items-center">
+                                {/* Option 1 */}
+                                {visibleEditions?.map((edition) => {
 
-                            {/* Option 2 */}
-                            {/*
-                                <label className="w-full sm:w-[200px] cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="edition"
-                                        value="standard"
-                                        className="peer sr-only"
-                                    />
-                                    <div className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500">
-                                        <div className="flex items-center justify-between">
-                                                <span className="text-sm font-semibold text-white">Standard</span>
-                                                <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div>
-                                        </div>
-                                    <div className="mt-1 text-xs text-white/50">from ₹1,092.34</div>
-                                    </div>
-                                </label> 
-                            */}
+                                    const isAvailable = edition.Available; // or whatever field indicates availability
+
+                                    return (
+                                        <label key={edition.slug} className={`w-full cursor-pointer select-none ${isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}>
+                                            <input
+                                                type="radio"
+                                                name="edition"
+                                                value={edition.slug}
+                                                className="peer sr-only"
+                                                // checked={router.query.slug === product.slug}
+                                                // onChange={() => router.push(`/gift-card/${product.slug}`)}
+                                                checked={selectedSlug === edition.slug}
+                                                disabled={!isAvailable}
+                                                onChange={() => {
+
+                                                    if (!isAvailable) return;
+                                                    if (edition.slug === selectedSlug) return;
+
+                                                    const matched = allVariants.find(
+                                                        (p) =>
+                                                            p.var_title === edition.var_title &&
+                                                            p.region?.toLowerCase() === selectedRegion?.toLowerCase()
+                                                    );
+
+                                                    if (!matched) {
+                                                        toast("This combination is not available");
+                                                        return;
+                                                    }
+
+                                                    router.push(`/store/category/gift-card/psn/${matched.slug}`);
+                                                }}
+                                            />
+
+                                            <div className={`p-3 rounded-xl border bg-[#1a1a1a] transition-all flex flex-col justify-between min-h-[90px]
+                      ${!isAvailable
+                                                    ? "border-gray-700 bg-[#111] text-white/40"
+                                                    : selectedSlug === edition.slug
+                                                        ? "border-purple-500 ring-2 ring-purple-500/40 scale-[1.02]"
+                                                        : "border-[#2e2e2e] hover:border-purple-400"
+                                                }`}>  {/* className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500" */}
+
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-semibold text-white flex items-center gap-2">
+                                                        {edition.var_title}
+
+                                                        {selectedSlug === edition.slug && isAvailable && (
+                                                            <span className="text-green-400 text-xs">(Current)</span>
+                                                        )}
+
+                                                        {!isAvailable && (
+                                                            <span className="text-red-400 text-xs">(Out of stock)</span>
+                                                        )}
+                                                    </span> {/* <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div> */}
+                                                </div>
+
+                                                <div className="mt-1 text-xs text-white/50 h-[16px]">
+                                                    {isAvailable ? (
+                                                        <>from {symbol}{edition.discountPrice}</>
+                                                    ) : (
+                                                        "Unavailable"
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                            {/* BUTTON */}
+                            {uniqueEditions.length > 5 && !expanded && (
+                                <div className="flex justify-center mt-4">
+                                    <button
+                                        onClick={() => setExpanded(true)}
+                                        className="flex items-center gap-2 bg-[#2a2a2a] hover:bg-[#333] text-white px-4 py-2 rounded-full text-sm transition-all duration-300 hover:scale-105 active:scale-95"
+                                    >
+                                        See all
+
+                                        <svg
+                                            className="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>)}
                 </div>
 
                 {/* Right: Pricing Box - Shows on xl screens or as last column on lg */}
                 {/* <div className="w-full md:w-[380px] bg-[#111111] rounded-2xl p-4 space-y-4 text-white"> */}
-                <div className="w-full max-w-md mx-auto bg-gradient-to-br from-[#111] to-[#1a1a1a] p-4 rounded-2xl shadow-lg border border-neutral-800 mt-6">
+                <div className="w-full max-w-md mx-auto bg-gradient-to-br from-[#111] to-[#1a1a1a] p-4 rounded-2xl shadow-lg border border-neutral-800 mt-6 self-start sticky top-6">
                     {/* Featured Offer */}
                     <div>
                         <p className="text-xs text-white/70 uppercase font-medium mb-1">Featured Offer</p>
                         <p className="text-xl lg:text-2xl font-bold">{symbol} {Number(product.discountPrice).toFixed(2)}</p>
                         <div className="flex items-center gap-2 text-xs lg:text-sm text-white/60">
-                            <span className="line-through">{symbol} {Number(product.price).toFixed(2)}</span>
-                            <span className="text-green-400 font-semibold">~ {discountPercent}% off</span>
+                            {/* <span className="line-through">{symbol} {Number(product.price).toFixed(2)}</span>
+                            <span className="text-green-400 font-semibold">~ {discountPercent}% off</span> */}
                         </div>
                     </div>
 
@@ -333,19 +584,29 @@ export default function ProductPage({ product }) {
                         {product.Available ? (<button onClick={handleAddToCart} className="cursor-pointer bg-neutral-800 p-2 lg:p-3 rounded-lg text-white flex items-center justify-center">
                             <MdOutlineAddShoppingCart className="text-xl lg:text-2xl" />
                         </button>) :
-                        (<button disabled className="cursor-not-allowed bg-gray-400 p-2 lg:p-3 rounded-lg text-white flex items-center justify-center">
-                            <MdOutlineAddShoppingCart className="text-xl lg:text-2xl" />
-                        </button>)}
+                            (<button disabled className="cursor-not-allowed bg-gray-400 p-2 lg:p-3 rounded-lg text-white flex items-center justify-center">
+                                <MdOutlineAddShoppingCart className="text-xl lg:text-2xl" />
+                            </button>)}
 
                         {/* Buy Now full-width button */}
-                        {product.Available ? (<button className="cursor-pointer flex items-center justify-center gap-2 bg-[#814DE5] hover:bg-[#6C34D8] transition-colors text-white px-3 lg:px-4 py-2 lg:py-3 rounded-lg w-full font-semibold text-sm lg:text-base">
-                            <RiShoppingBag3Fill className="text-xl lg:text-2xl" />
-                            Buy now
-                        </button>) : (
-                        <button disabled className="cursor-not-allowed flex items-center justify-center gap-2 bg-gray-400 text-white px-3 lg:px-4 py-2 lg:py-3 rounded-lg w-full font-semibold text-sm lg:text-base">
-                            <RiShoppingBag3Fill className="text-xl lg:text-2xl" />
-                            Sold Out
-                        </button>)}
+                        {product.Available ? (
+                            <button
+                                onClick={handleBuyNow}
+                                disabled={loading}
+                                className="cursor-pointer flex items-center justify-center gap-2 bg-[#814DE5] hover:bg-[#6C34D8] transition-colors text-white px-3 lg:px-4 py-2 lg:py-3 rounded-lg w-full font-semibold text-sm lg:text-base"
+                            >
+                                <RiShoppingBag3Fill className="text-xl lg:text-2xl" />
+                                {loading ? "Processing..." : "Buy now"}
+                            </button>
+                        ) : (
+                            <button
+                                disabled
+                                className="select-none cursor-not-allowed flex items-center justify-center gap-2 bg-gray-400 text-white px-3 lg:px-4 py-2 lg:py-3 rounded-lg w-full font-semibold text-sm lg:text-base"
+                            >
+                                <RiShoppingBag3Fill className="text-xl lg:text-2xl" />
+                                {loading ? "Processing..." : "Buy now"}
+                            </button>
+                        )}
                     </div>
 
                     {/* Explore Plus */}
@@ -357,28 +618,45 @@ export default function ProductPage({ product }) {
                     {/* Feature Boxes */}
                     <div className="grid grid-cols-3 gap-0 mt-3">
                         {/* Instant Delivery */}
-                        <div className="bg-neutral-800 px-3 py-2 lg:py-3 rounded-l-lg flex items-center justify-start gap-2">
-                            <div className="">
-                                <AiFillThunderbolt className="text-lg lg:text-xl text-yellow-500" />
+                        <HoverCard title="Product code will be delivered instantly.">
+                            <div className="bg-[#1e1e1e] px-3 py-2 lg:py-3 rounded-l-lg flex items-center justify-start gap-2">
+                                <div className="">
+                                    {/* <AiFillThunderbolt className="text-lg lg:text-xl text-yellow-500" /> */}
+                                    <svg className="w-6 h-6 text-blue-500 fill-current">
+                                        <use xlinkHref="/sprit/icons.svg#thunder"></use>
+                                    </svg>
+
+                                </div>
+                                <span className="text-xs lg:text-sm text-white">Instant Delivery</span>
                             </div>
-                            <span className="text-xs lg:text-sm text-white">Instant Delivery</span>
-                        </div>
+                        </HoverCard>
 
                         {/* 24/7 Support */}
-                        <div className="bg-neutral-800 px-3 py-2 lg:py-3 flex items-center justify-start gap-2">
-                            <div className="">
-                                <MdSupportAgent className="text-xl lg:text-3xl text-[#1cc54c]" />
+                        <HoverCard title="Get prompt assistance from our dedicated support team.">
+                            <div className="bg-[#1e1e1e] px-3 py-2 lg:py-3 flex items-center justify-start gap-2">
+                                <div className="">
+                                    {/* <MdSupportAgent className="text-xl lg:text-3xl text-[#1cc54c]" /> */}
+                                    <svg className="w-6 h-6 text-[#1cc54c] fill-current">
+                                        <use xlinkHref="/sprit/icons.svg#support-agent"></use>
+                                    </svg>
+                                </div>
+                                <span className="text-xs lg:text-sm text-white">24/7 Support</span>
                             </div>
-                            <span className="text-xs lg:text-sm text-white">24/7 Support</span>
-                        </div>
+                        </HoverCard>
 
                         {/* Verified Sellers */}
-                        <div className="bg-neutral-800 px-3 py-2 lg:py-3 rounded-r-lg flex items-center justify-start gap-2">
-                            <div className="">
-                                <MdVerified className="text-xl lg:text-3xl text-[#359dff]" />
+                        <HoverCard title="Buy confidently from verified and reliable sellers.">
+                            <div className="bg-[#1e1e1e] px-3 py-2 lg:py-3 rounded-r-lg flex items-center justify-start gap-2">
+                                <div className="">
+                                    {/* <MdVerified className="text-xl lg:text-3xl text-[#359dff]" /> */}
+                                    <svg className="w-6 h-6">
+                                        <use xlinkHref="/sprit/icons.svg#verified-filled"></use>
+                                    </svg>
+                                </div>
+                                <span className="text-xs lg:text-sm text-white">Verified Sellers</span>
                             </div>
-                            <span className="text-xs lg:text-sm text-white">Verified Sellers</span>
-                        </div>
+                        </HoverCard>
+
                     </div>
                 </div>
             </div>
@@ -436,7 +714,7 @@ export default function ProductPage({ product }) {
             {product.notice && (<><div className="bg-[#1a1a1a] text-orange-500 p-3 lg:p-4 rounded-xl mt-4 lg:mt-6 text-xs lg:text-sm border border-[#2a2a2a] max-w-[1500px] mx-auto">
                 <div className="flex flex-col lg:flex-row gap-1 lg:gap-2 xl:gap-5">
                     <div className="font-semibold text-orange-500 text-sm lg:text-base xl:text-lg">
-                        {product.notice}
+                        Important Notice: {product.notice}
                     </div>
                     {/* <div className="font-semibold text-orange-500 text-sm lg:text-base xl:text-lg">
                             Works only on PC. Activate the code on Rockstar Games Launcher.
@@ -449,16 +727,17 @@ export default function ProductPage({ product }) {
             {/* Product Description */}
             <div className="bg-[#1a1a1a] p-3 lg:p-4 rounded-xl mt-4 lg:mt-6 text-xs lg:text-sm border border-[#2a2a2a] max-w-[1500px] mx-auto">
                 <h2 className="text-lg lg:text-xl font-bold mb-3 lg:mb-4 dark:text-white">Product description</h2>
-                {/* <div className="font-semibold mb-5 text-lg">{product.title}</div> */}
 
-                <div className="flex items-center gap-2 mb-5.5">
+                {/* <div className="flex items-center gap-2 mb-5.5">
                     <span className="text-gray-400 text-[14px]">System :</span>
                     <span className="bg-[#2f2f2f] text-white px-2 lg:px-3 py-1.5 rounded-[20px] text-[14px] font-medium cursor-pointer">{product.workPlatform}</span>
-                </div>
+                </div> */}
+
+                <div className="font-semibold mb-5 text-lg">{product.title}</div>
 
                 {Tags.gametag_1 && (<div className="flex gap-3.5">
-                    {Tags.gametag_1 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[35px] w-[100px] flex items-center justify-center">{Tags.gametag_1}</div>)}
-                    {Tags.gametag_2 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[35px] w-[100px] flex items-center justify-center">{Tags.gametag_2}</div>)}
+                    {Tags.gametag_1 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[40px] w-[150px] flex items-center justify-center">{Tags.gametag_1}</div>)}
+                    {Tags.gametag_2 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[40px] w-[150px] flex items-center justify-center">{Tags.gametag_2}</div>)}
                     {Tags.gametag_3 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[35px] w-[100px] flex items-center justify-center">{Tags.gametag_3}</div>)}
                     {Tags.gametag_4 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[35px] w-[100px] flex items-center justify-center">{Tags.gametag_4}</div>)}
                     {Tags.gametag_5 && (<div className="rounded-2xl bg-[#2a2a2a] hover:bg-[#333] transition-all h-[35px] w-[100px] flex items-center justify-center">{Tags.gametag_5}</div>)}
@@ -481,12 +760,12 @@ export default function ProductPage({ product }) {
                         <div className="justify-center">
                             <ReactMarkdown
                                 components={{
-                                    h1: ({ node, ...props }) => <h1 className="font-semibold mb-5 text-lg" {...props} />,    //importent but if you add h2 on heading description
+                                    h1: ({ node, ...props }) => <h1 className="font-semibold mb-2.5 text-lg" {...props} />,    //importent but if you add h2 on heading description
                                     h2: ({ node, ...props }) => <h2 className="text-md font-bold mt-6 mb-2" {...props} />,    //importent but if you add h2 on heading description
                                     strong: ({ node, ...props }) => <strong className="text-md font-bold text-white" {...props} />,    //importent but if you add h2 on heading description
                                     ul: ({ node, ...props }) => <ul className="list-disc pl-0 ml-8 mb-5" {...props} />,   //importent
                                     li: ({ node, ...props }) => <li className="mb-1 text-[#bfbfbf]" {...props} />,   //importent
-                                    p: ({ node, ...props }) => <p className="mb-2 leading-relaxed text-[#bfbfbf] tracking-tight" {...props} />,   //importent
+                                    p: ({ node, ...props }) => <p className="mb-2 leading-relaxed text-[#bfbfbf]" {...props} />,   //importent
                                     a: ({ node, ...props }) => <a className="mb-2 leading-relaxed text-[#359dff]" {...props} />,   //importent
                                 }}
                             >
@@ -507,7 +786,7 @@ export default function ProductPage({ product }) {
                                     strong: ({ node, ...props }) => <strong className="text-md font-bold text-white" {...props} />,    //importent but if you add h2 on heading description
                                     ul: ({ node, ...props }) => <ul className="list-disc pl-0" {...props} />,   //importent
                                     li: ({ node, ...props }) => <li className="mb-1" {...props} />,   //importent
-                                    p: ({ node, ...props }) => <p className="mb-2 leading-relaxed tracking-tight" {...props} />,   //importent
+                                    p: ({ node, ...props }) => <p className="mb-2 leading-relaxed" {...props} />,   //importent
                                 }}
                             >
                                 {product?.descriptionkey}
@@ -527,7 +806,7 @@ export default function ProductPage({ product }) {
                                     strong: ({ node, ...props }) => <strong className="text-md font-bold text-white" {...props} />,    //importent but if you add h2 on heading description
                                     ul: ({ node, ...props }) => <ul className="list-disc pl-0" {...props} />,   //importent
                                     li: ({ node, ...props }) => <li className="mb-1" {...props} />,   //importent
-                                    p: ({ node, ...props }) => <p className="mb-2 leading-relaxed tracking-tight" {...props} />,   //importent
+                                    p: ({ node, ...props }) => <p className="mb-2 leading-relaxed" {...props} />,   //importent
                                 }}
                             >
                                 {product?.editiondescription}
@@ -697,7 +976,7 @@ export default function ProductPage({ product }) {
             </div>)}
 
             {/* Other details */}
-            {product.releaseDate && (<div className="bg-[#1a1a1a] text-white p-4 lg:p-6 rounded-xl mt-4 lg:mt-8 border border-[#2a2a2a] text-xs lg:text-sm space-y-3 lg:space-y-4 max-w-[1500px] mx-auto">
+            {product.publisher && (<div className="bg-[#1a1a1a] text-white p-4 lg:p-6 rounded-xl mt-4 lg:mt-8 border border-[#2a2a2a] text-xs lg:text-sm space-y-3 lg:space-y-4 max-w-[1500px] mx-auto">
                 {/* Section Title */}
                 {/* <h2 className="text-sm lg:text-base font-semibold">Other details</h2> */}
 
@@ -712,10 +991,10 @@ export default function ProductPage({ product }) {
                         <p className="text-gray-400 mb-1">Developers</p>
                         <p className="text-white">{product.developer}</p>
                     </div>
-                    <div>
+                    {product.releaseDate && (<div>
                         <p className="text-gray-400 mb-1">Release date</p>
                         <p className="text-white">{product.releaseDate}</p>
-                    </div>
+                    </div>)}
                     {ageimage && (<div>
                         <p className="text-gray-400 mb-1">Age rating</p>
                         <Image width={6} height={6} src={age} alt="18+" className="w-8 h-8" />

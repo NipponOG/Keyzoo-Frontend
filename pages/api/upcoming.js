@@ -272,7 +272,8 @@ export default async function handler(req, res) {
         const formattedGames = rawGames.map((game) => {
             const coverUrl = game.cover?.image_id
                 ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-                : 'https://res.cloudinary.com/dcgdp1qjr/image/upload/v1765800475/ChatGPT_Image_Dec_15_2025_02_53_00_PM_t9hoyk.png';
+                // : 'https://res.cloudinary.com/dcgdp1qjr/image/upload/v1765800475/ChatGPT_Image_Dec_15_2025_02_53_00_PM_t9hoyk.png';
+                : "/keyzoo-fallback.png";
 
             const releaseDate = game.first_release_date
                 ? new Date(game.first_release_date * 1000).toLocaleDateString("en-GB", {

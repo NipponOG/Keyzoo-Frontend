@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchFromStrapi } from '@/lib/strapi';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import toast from "react-hot-toast";
 import Image from 'next/image';
 import Link from 'next/link';
 import useCurrency from '@/hook/useCurrency';
@@ -32,6 +32,7 @@ export default function index() {
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [notified, setNotified] = useState({});
 
   // FILTER STATES
   const [search, setSearch] = useState("");
@@ -52,6 +53,55 @@ export default function index() {
   const [selectedWorksOn, setSelectedWorksOn] = useState([]);
 
   const [page, setPage] = useState(1);
+
+  const handleNotify = async (item) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("jwt");
+
+      if (!user || !token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_STRAPI_URL}api/stock-alerts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            data: {
+              product: item.id,
+            },
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      // console.log("API RESPONSE:", data);
+      // console.log("USER:", user);
+      // console.log("PRODUCT:", item);
+
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Already subscribed");
+      }
+
+      toast.success("We’ll notify you 🔔");
+
+      setNotified((prev) => ({
+        ...prev,
+        [item.id]: true,
+      }));
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong");
+    }
+  };
 
   useEffect(() => {
     window.scrollTo({
@@ -697,23 +747,20 @@ export default function index() {
                   <div key={item.id} className='mb-2 mt-2'>
                     {item.Available ? (
                       <Link
-                        // href={`/store/category/gift-card/${item.platform}/${item.slug}`}
+                        // href={`/product/${item.slug}`}
                         href={getItemHref(item)}
                         // className="block p-1 rounded-lg hover:shadow-md transition bg-white dark:bg-[#1a1a1a] relative max-w-[260px] mx-auto"
-                        className="block p-1 rounded-lg bg-white dark:bg-[#1a1a1a] relative max-w-[260px] mx-auto shadow-sm dark:shadow-none hover:shadow-lg transition-transform duration-300 transform hover:-translate-y-1">
+                        className="block p-1 rounded-lg bg-white dark:bg-[#1a1a1a] relative min-w-[200px] mx-auto shadow-sm dark:shadow-none hover:shadow-lg transition-transform duration-300 transform hover:-translate-y-1"
+                      >
                         <div className="relative w-full aspect-[3/5] mb-1.5 rounded-md overflow-hidden">
                           {/* {imageUrl && ( */}
-                          {/* <Image
-                            src={imgUrl}
-                            alt={item.title}
-                            fill
-                            className={`object-center transition ${item.Available ? '' : 'grayscale opacity-60'}`}
-                          /> */}
                           <ProductCardImage
                             imgUrl={imgUrl}
                             blurUrl={blurUrl}
-                            title={item.title}
                             available={item.Available}
+                          // alt={item.title}
+                          // fill
+                          // className="object-center"
                           />
                           {/* )} */}
 
@@ -731,30 +778,44 @@ export default function index() {
                             </span>
                           )}
                         </div>
-                        <div className='bg-gray-100 dark:bg-black/30 backdrop-blur-sm px-1 py-1 rounded-b-md'>
+                        <div className='bg-gray-100 dark:bg-black/30 backdrop-blur-sm px-1 py-1 rounded-b-md h-[120px]'>
                           <HoverCard title={item.title}>
-                            <h3 className="text-md font-semibold line-clamp-2 px-3 mt-1 text-black">{item.title}</h3>
+                            <h3 className="text-sm font-semibold line-clamp-2 px-1.5 mt-1 text-black">
+                              {item.title}
+                            </h3>
                           </HoverCard>
-                          <h3 className="text-lg font-semibold text-blue-600 px-3 mt-1">{item.card_region}</h3>
-                          <p className="text-lg text-gray-600 dark:text-gray-300 px-3 mt-2 mb-2">
-                            {symbol} {item.discountPrice}
+                          <h3 className="text-sm font-semibold text-blue-600 px-1.5 mt-0.5">{item.card_region}</h3>
+                          <p className="text-lg text-gray-600 dark:text-gray-300 px-1.5 mt-1 mb-1.5">
+                            {symbol} {Number(item.discountPrice).toFixed(2)}
                           </p>
                         </div>
                       </Link>
                     ) : (
                       <div
-                        // href={`/gift-card/${item.slug}`}
+                        // href={`/product/${item.slug}`}
                         // className="block p-1 rounded-lg hover:shadow-md transition bg-white dark:bg-[#1a1a1a] relative max-w-[260px] mx-auto"
-                        className="block p-1 rounded-lg bg-white dark:bg-[#1a1a1a] relative max-w-[260px] mx-auto shadow-sm dark:shadow-none hover:shadow-lg transition-transform duration-300 transform hover:-translate-y-1 cursor-not-allowed">
+                        className="block p-1 rounded-lg bg-white dark:bg-[#1a1a1a] relative min-w-[200px] mx-auto shadow-sm dark:shadow-none hover:shadow-lg transition-transform duration-300 transform hover:-translate-y-1 cursor-not-allowed"
+                      >
                         <div className="relative w-full aspect-[3/5] mb-1.5 rounded-md overflow-hidden">
                           {/* {imageUrl && ( */}
-                          <Image
-                            src={imgUrl}
-                            alt={item.title}
-                            fill
-                            className={`object-center transition ${item.Available ? '' : 'grayscale opacity-60'}`}
+                          <ProductCardImage
+                            imgUrl={imgUrl}
+                            blurUrl={blurUrl}
+                            available={item.Available}
+                          // alt={item.title}
+                          // fill
+                          // className={`object-center transition ${item.Available ? '' : 'grayscale opacity-60'}`}
                           />
                           {/* )} */}
+
+                          {/* 🔥 Bottom overlay container */}
+                          <div className="absolute bottom-3 left-0 w-full flex justify-center px-3">
+
+                            <button onClick={() => handleNotify(item)} disabled={notified[item.id]} className="flex items-center justify-center gap-2 w-full max-w-[85%] bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold py-2.5 rounded-md hover:bg-white/20 transition shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer">
+                              {notified[item.id] ? "✔ Notified" : "🔔 Notify me"}
+                            </button>
+
+                          </div>
 
                           {/* Platform badge */}
                           {item.platform && (
@@ -770,12 +831,14 @@ export default function index() {
                             </span>
                           )}
                         </div>
-                        <div className='bg-gray-100 dark:bg-black/30 backdrop-blur-sm px-1 py-1 rounded-b-md'>
+                        <div className='bg-gray-100 dark:bg-black/30 backdrop-blur-sm px-1 py-1 rounded-b-md h-[120px]'>
                           <HoverCard title={item.title}>
-                            <h3 className="text-md font-semibold line-clamp-2 px-3 mt-1 text-black">{item.title}</h3>
+                            <h3 className="text-sm font-semibold line-clamp-2 px-1.5 mt-1 text-black">
+                              {item.title}
+                            </h3>
                           </HoverCard>
-                          <h3 className="text-lg font-semibold text-blue-600 px-3 mt-1">{item.card_region}</h3>
-                          <p className="text-lg text-red-800 font-extrabold dark:text-gray-300 px-3 mt-2 mb-2">
+                          <h3 className="text-sm font-semibold text-blue-600 px-1.5 mt-0.5">{item.card_region}</h3>
+                          <p className="text-lg text-[#cc0000] font-bold dark:text-gray-300 px-1.5 mt-1 mb-1.5">
                             Sold Out
                           </p>
                         </div>
