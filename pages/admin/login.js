@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAdmin } from "@/context/AdminContext";
+import { loginPasskey } from "@/lib/passkey";
 
 export default function AdminLogin() {
 
@@ -95,7 +96,7 @@ export default function AdminLogin() {
             if (!response.ok) {
 
                 // setError(data.error || "Login failed");
-                setError( typeof data.error === "string" ? data.error : data.error?.message || "Login failed");
+                setError(typeof data.error === "string" ? data.error : data.error?.message || "Login failed");
 
                 return;
 
@@ -131,6 +132,35 @@ export default function AdminLogin() {
 
         } finally {
 
+            setLoading(false);
+        }
+    };
+
+    const handlePasskeyLogin = async () => {
+        if (!email) {
+            setError("Please enter your email first.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError("");
+
+            const data = await loginPasskey(email);
+
+            // Save authenticated user
+            login(data.jwt, data.user);
+
+            // Redirect to dashboard
+            router.replace("/tc");
+
+        } catch (err) {
+            console.error(err);
+
+            setError(
+                err.message || "Passkey login failed."
+            );
+        } finally {
             setLoading(false);
         }
     };
@@ -195,6 +225,21 @@ export default function AdminLogin() {
                         ? "Signing In..."
                         : "Sign In"}
 
+                </button>
+
+                <div className="my-6 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-[#333]" />
+                    <span className="text-sm text-gray-500">OR</span>
+                    <div className="h-px flex-1 bg-[#333]" />
+                </div>
+
+                <button
+                    type="button"
+                    onClick={handlePasskeyLogin}
+                    disabled={loading}
+                    className="w-full rounded-lg border border-[#333] bg-[#232323] py-3 text-white transition hover:bg-[#2b2b2b]"
+                >
+                    Sign in with Passkey
                 </button>
 
             </form>

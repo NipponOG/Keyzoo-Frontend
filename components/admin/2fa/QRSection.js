@@ -1,4 +1,5 @@
 import StyledQRCode from "@/components/admin/qr/StyledQRCode";
+import { registerPasskey } from "@/lib/passkey";
 
 export default function QRSection({
 
@@ -31,6 +32,19 @@ export default function QRSection({
     loadQRCode,
 
 }) {
+
+    const handleRegisterPasskey = async () => {
+        try {
+            const jwt = localStorage.getItem("jwt");
+
+            await registerPasskey(jwt);
+
+            alert("Passkey registered successfully.");
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        }
+    };
 
     return (
 
@@ -254,6 +268,27 @@ export default function QRSection({
 
                     }
 
+                </button>
+
+                <button
+                    type="button"
+                    onClick={handleRegisterPasskey}
+                    className="
+        mt-10
+        h-14
+        w-full
+        rounded-2xl
+        bg-gradient-to-r
+        from-indigo-600
+        to-violet-600
+        text-xl
+        font-semibold
+        text-white
+        transition
+        hover:scale-[1.01]
+    "
+                >
+                    Register Passkey
                 </button>
 
                 <div className="mt-8 text-center text-gray-400">
