@@ -53,18 +53,18 @@ export const AuthProvider = ({ children }) => {
     const [jwt, setJwt] = useState(null);
     const [loading, setLoading] = useState(true); // ⭐ NEW
 
-    useEffect(() => {
-        const savedUser = localStorage.getItem("user");
-        const savedJwt = localStorage.getItem("jwt");
-        if (savedUser && savedJwt) {
-            setUser(JSON.parse(savedUser));
-            setJwt(savedJwt);
-        }
-        // ⭐ Add small delay to prevent skeleton flicker
-        const timer = setTimeout(() => setLoading(false), 800);
+    // useEffect(() => {
+    //     const savedUser = localStorage.getItem("user");
+    //     const savedJwt = localStorage.getItem("jwt");
+    //     if (savedUser && savedJwt) {
+    //         setUser(JSON.parse(savedUser));
+    //         setJwt(savedJwt);
+    //     }
+    //     // ⭐ Add small delay to prevent skeleton flicker
+    //     const timer = setTimeout(() => setLoading(false), 800);
 
-        return () => clearTimeout(timer);
-    }, []);
+    //     return () => clearTimeout(timer);
+    // }, []);
 
     // ⭐ NEXTAUTH GOOGLE LOGIN SESSION SYNC
     // const { data: session, status } = useSession();
@@ -92,6 +92,55 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user");
         localStorage.removeItem("jwt");
     };
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const savedJwt = localStorage.getItem("jwt");
+
+            if (!savedJwt) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_STRAPI_URL}api/admin-auth/me`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${savedJwt}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error("Failed to verify session.");
+                }
+
+                const data = await res.json();
+
+                setJwt(savedJwt);
+                setUser(data.user);
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(data.user)
+                );
+
+            } catch (err) {
+                console.error("Auth verification failed:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkAuth();
+    }, []);
 
     return (
         <AuthContext.Provider value={{ user, jwt, login, logout, loading }}>

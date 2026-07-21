@@ -24,6 +24,8 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef } from "react";
 import adminFetch from "@/lib/adminFetch";
+import { FiSettings } from "react-icons/fi";
+import Link from "next/link";
 
 export default function Dashboard() {
 
@@ -672,7 +674,7 @@ export default function Dashboard() {
                 <div className="min-h-screen p-6">
                     <div className="max-w-[1700px] mx-auto px-8 space-y-6">
 
-                        <div className="mb-6">
+                        {/* <div className="mb-6">
                             <h1 className="text-4xl font-bold text-white">
                                 Welcome back, Nippan 👋
                             </h1>
@@ -680,6 +682,48 @@ export default function Dashboard() {
                             <p className="text-gray-400 mt-2">
                                 Here's what's happening with your store today.
                             </p>
+                        </div> */}
+
+                        <div className="mb-6 flex items-start justify-between">
+
+                            <div>
+                                <h1 className="text-4xl font-bold text-white">
+                                    Welcome back, Nippan 👋
+                                </h1>
+
+                                <p className="mt-2 text-gray-400">
+                                    Here's what's happening with your store today.
+                                </p>
+                            </div>
+
+                            <Link
+                                href="/admin/settings"
+                                className="
+            group
+            flex
+            h-12
+            w-12
+            items-center
+            justify-center
+            rounded-2xl
+            border
+            border-white/10
+            bg-[#1d1d1d]
+            text-gray-400
+            transition-all
+            duration-200
+            hover:border-indigo-500/40
+            hover:bg-indigo-500/10
+            hover:text-indigo-400
+        "
+                                title="Settings"
+                            >
+                                <FiSettings
+                                    size={22}
+                                    className="transition-transform duration-300 group-hover:rotate-90"
+                                />
+                            </Link>
+
                         </div>
 
                         {/* <MetricCards /> */}

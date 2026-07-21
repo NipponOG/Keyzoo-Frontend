@@ -1,5 +1,7 @@
 import StyledQRCode from "@/components/admin/qr/StyledQRCode";
 import { registerPasskey } from "@/lib/passkey";
+import { useState } from "react";
+import RegisterPasskeyModal from "@/components/admin/passkey/RegisterPasskeyModal";
 
 export default function QRSection({
 
@@ -33,16 +35,25 @@ export default function QRSection({
 
 }) {
 
-    const handleRegisterPasskey = async () => {
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [registeringPasskey, setRegisteringPasskey] = useState(false);
+
+    const handleRegisterPasskey = async (deviceName) => {
         try {
+            setRegisteringPasskey(true);
+
             const jwt = localStorage.getItem("jwt");
 
-            await registerPasskey(jwt);
+            await registerPasskey(jwt, deviceName);
+
+            setShowRegisterModal(false);
 
             alert("Passkey registered successfully.");
         } catch (err) {
             console.error(err);
             alert(err.message);
+        } finally {
+            setRegisteringPasskey(false);
         }
     };
 
@@ -272,7 +283,7 @@ export default function QRSection({
 
                 <button
                     type="button"
-                    onClick={handleRegisterPasskey}
+                    onClick={() => setShowRegisterModal(true)}
                     className="
         mt-10
         h-14
@@ -307,6 +318,13 @@ export default function QRSection({
                 </div>
 
             </form>
+
+            <RegisterPasskeyModal
+                open={showRegisterModal}
+                loading={registeringPasskey}
+                onClose={() => setShowRegisterModal(false)}
+                onRegister={handleRegisterPasskey}
+            />
 
         </div>
 
