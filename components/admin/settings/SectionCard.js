@@ -9,7 +9,7 @@ export default function SectionCard({
                 rounded-xl
                 border
                 border-white/10
-                p-8
+                p-5 sm:p-8
             "
         >
             <div className="mb-6">

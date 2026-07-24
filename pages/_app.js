@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Head from 'next/head';
 import { ThemeProvider } from 'next-themes'
-import { Toaster } from 'react-hot-toast';
+// import { Toaster } from 'react-hot-toast';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -14,7 +14,7 @@ import { useDispatch } from "react-redux";
 import { loadCart } from "@/store/cartSlice";
 import Maintenance from '@/components/Maintenance';
 import { AuthProvider } from '@/context/AuthContext';
-// import { SessionProvider } from "next-auth/react";
+import { Toaster, toast } from 'sonner'
 import PageLoader from "@/components/PageLoader";
 import 'react-loading-skeleton/dist/skeleton.css';
 import { SkeletonTheme } from 'react-loading-skeleton';
@@ -143,7 +143,13 @@ export default function MyApp({ Component, pageProps }) {
                       <Header />
                       <main className="flex-grow">
                         <Component {...pageProps} />
-                        <Toaster position="top-right" />
+                        {/* <Toaster position="top-right" /> */}
+                        <Toaster
+                          position="bottom-right"
+                          richColors
+                          expand
+                          duration={3500}
+                        />
                       </main>
                       <Footer />
                     </div>

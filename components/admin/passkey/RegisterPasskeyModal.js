@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function RegisterPasskeyModal({
     open,
@@ -6,18 +6,27 @@ export default function RegisterPasskeyModal({
     onRegister,
     loading,
 }) {
+
     const [deviceName, setDeviceName] = useState("");
+
+    useEffect(() => {
+
+        if (!open) {
+            setDeviceName("");
+        }
+
+    }, [open]);
 
     if (!open) return null;
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+
         const name = deviceName.trim();
 
         if (!name) return;
 
-        onRegister(name);
+        await onRegister(name);
 
-        setDeviceName("");
     };
 
     return (
@@ -56,10 +65,7 @@ export default function RegisterPasskeyModal({
                 <div className="mt-8 flex justify-end gap-3">
 
                     <button
-                        onClick={() => {
-                            setDeviceName("");
-                            onClose();
-                        }}
+                        onClick={onClose}
                         className="rounded-xl border border-white/10 px-5 py-3 text-gray-300"
                     >
                         Cancel

@@ -2,6 +2,7 @@ import PasskeyCard from "./PasskeyCard";
 import { registerPasskey } from "@/lib/passkey";
 import { useState } from "react";
 import RegisterPasskeyModal from "@/components/admin/passkey/RegisterPasskeyModal";
+import { toast } from "sonner";
 
 export default function PasskeyList({
     passkeys,
@@ -13,8 +14,33 @@ export default function PasskeyList({
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const [registeringPasskey, setRegisteringPasskey] = useState(false);
 
+    // const handleRegisterPasskey = async (deviceName) => {
+    //     try {
+    //         setRegisteringPasskey(true);
+
+    //         const jwt = localStorage.getItem("jwt");
+
+    //         await registerPasskey(jwt, deviceName);
+
+    //         await onRefresh();
+
+    //         setShowRegisterModal(false);
+
+    //         alert("Passkey registered successfully.");
+    //     } catch (err) {
+    //         console.error(err);
+    //         alert(err.message);
+    //     } finally {
+    //         setRegisteringPasskey(false);
+    //     }
+    // };
+
     const handleRegisterPasskey = async (deviceName) => {
+
+        const toastId = toast.loading("Registering passkey...");
+
         try {
+
             setRegisteringPasskey(true);
 
             const jwt = localStorage.getItem("jwt");
@@ -25,13 +51,26 @@ export default function PasskeyList({
 
             setShowRegisterModal(false);
 
-            alert("Passkey registered successfully.");
+            toast.success("Passkey registered", {
+                id: toastId,
+                description: `"${deviceName}" is now available for passwordless sign in.`,
+            });
+
         } catch (err) {
+
             console.error(err);
-            alert(err.message);
+
+            toast.error("Unable to register passkey", {
+                id: toastId,
+                description: err.message,
+            });
+
         } finally {
+
             setRegisteringPasskey(false);
+
         }
+
     };
 
     if (!passkeys.length) {
