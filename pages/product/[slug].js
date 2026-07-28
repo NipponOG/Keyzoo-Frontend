@@ -515,50 +515,78 @@ export default function ProductPage({ product, regionsData }) {
       </Head>
 
       <div className="min-h-screen p-4 lg:p-6">
-        <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[260px_1fr_380px] gap-4 lg:gap-6 xl:gap-8">
+        <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[240px_1fr_320px] xl:grid-cols-[260px_1fr_360px] 2xl:grid-cols-[260px_1fr_380px] gap-4 lg:gap-6 xl:gap-8">
           {/* Left: Cover Image - Fixed width for laptop and up */}
-          <div className="w-full md:w-[260px] flex justify-center mx-auto">
-            <div className="relative w-full md:w-[260px]">
+          {/* Left: Cover Image */}
+          <div className="w-full flex justify-center lg:justify-start">
+
+            <div
+              className="
+      relative
+      w-full
+      max-w-[240px]
+      lg:max-w-[220px]
+      xl:max-w-[240px]
+      2xl:max-w-[260px]
+      flex-shrink-0
+    "
+            >
+
               <Image
-                // src="http://localhost:1337/uploads/2f398399_fe1a_4364_8943_56f1ccb5b735_8df12031c6.webp"
-                // src={selectedVariation && selectedVariation.image?.url ? getStrapiMedia(selectedVariation.image.url) : imgUrl}
                 src={imgUrl}
-                // blurUrl={blurUrl}
                 width={260}
-                height={260}
+                height={360}
                 alt={product.title}
-                className="rounded-lg w-full h-auto"
-                layout="responsive"
+                className="rounded-xl w-full h-auto"
+                priority
               />
 
-              {/* this is for sold or not sold for this */}
-              {/* <span className="absolute bottom-15 right-2 bg-black/80 text-white text-[15px] px-2 py-0.5 rounded-lg uppercase"> */}
               {product.stock_stetus && (
-                <span className="absolute top-2 right-2 bg-black/80 text-white text-[15px] px-2 py-0.5 rounded-lg capitalize">
+                <span className="absolute top-2 right-2 bg-black/80 text-white text-sm px-2 py-1 rounded-lg capitalize">
                   {product.stockk_stetus}
                 </span>
               )}
+
             </div>
+
           </div>
 
           {/* Middle: Game Info - Flex column */}
-          <div className="flex flex-col gap-2 mx-auto xl:mx-0">
+          <div className="
+flex
+flex-col
+gap-2
+w-full
+min-w-0
+xl:mx-0
+">
             {" "}
             {/* mx-auto is the problem we need to fix it leater */}
-            <h1 title={product.title} className="text-lg lg:text-xl font-semibold dark:text-white text-justify tracking-tighter">
+            <h1
+              title={product.title}
+              className="
+    text-lg
+    lg:text-[18px]
+    xl:text-[20px]
+    font-bold
+    leading-tight
+    line-clamp-2
+    break-words
+  "
+            >
               {product.title}
             </h1>
             {/* Tags + Ratings */}
-            <div className="flex flex-wrap items-center gap-2 text-sm mt-2.5">
-              <span className="bg-[#5539cc] px-2.5 py-1 rounded font-medium text-white">
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              <span className="bg-[#5539cc] px-3 py-1 text-xs rounded-full font-medium text-white">
                 {product.item_type}
               </span>
-              <span className="bg-[#2a2a2a] px-2.5 py-1 rounded font-medium text-white">
+              <span className="bg-[#2a2a2a] px-3 py-1 text-xs rounded-full  font-medium text-white">
                 {product.item}
               </span>
               <div className="flex items-center gap-2 text-yellow-400 ml-0 sm:ml-2">
-                <span className="w-[1px] h-[30px] bg-[#ffffff1a]"></span>
-                <span className="flex items-center">
+                {/* <span className="w-[1px] h-[30px] bg-[#ffffff1a]"></span> */}
+                <span className="flex items-center justify-between">
                   <IoStarSharp className="text-xl" />
                   <IoStarSharp className="text-xl" />
                   <IoStarSharp className="text-xl" />
@@ -574,105 +602,112 @@ export default function ProductPage({ product, regionsData }) {
               </div>
             </div>
             {/* this is a devider for visual balance */}
-            <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div>
+            <div className="border-t border-neutral-800 mt-4"></div>
+
             {/* Feature Grid - 2 columns on laptop */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mt-4 lg:mt-6">
-              {/* India Activation */}
-              <div className="flex items-start gap-3">
-                <div className="h-[56px] w-[56px] border border-[#e7e7e7] bg-white dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
-                  {/* <SlCheck className="text-xl text-[#1cc54c]" /> */}
-                  <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
-                    <use xlinkHref="/sprit/icons.svg#green-tick"></use>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs lg:text-sm">
-                    Can be activated in <strong>{product.region}</strong>
-                  </p>
-                  <a href="#" className="text-[#359dff] text-xs">
-                    Check Restrictions
-                  </a>
-                </div>
-              </div>
+            <div className="bg-[#171717] border border-white/10 rounded-2xl p-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-              {/* Region */}
-              <div className="flex items-start gap-3">
-                <div className="h-[56px] w-[56px] border border-[#e7e7e7] bg-white dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
-                  {/* <FaGlobeAmericas className="text-xl text-[#359dff]" /> */}
-                  <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
-                    <use xlinkHref="/sprit/icons.svg#blue-globe"></use>
-                  </svg>
+                {/* India Activation */}
+                <div className="flex items-start gap-3 w-full">
+                  <div className="flex-shrink-0 h-[48px] w-[48px] border border-white/10 bg-white/5 dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
+                    {/* <SlCheck className="text-xl text-[#1cc54c]" /> */}
+                    <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
+                      <use xlinkHref="/sprit/icons.svg#green-tick"></use>
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-5">
+                      Can be activated in <strong>{product.region}</strong>
+                    </p>
+                    <a className="text-xs text-[#359dff] mt-1 inline-block">
+                      Check Restrictions
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs lg:text-sm">
-                    Region: <strong>{product.region}</strong>
-                  </p>
-                  <a href="#" className="text-[#359dff] text-xs">
-                    Check Region
-                  </a>
-                </div>
-              </div>
 
-              {/* Platform */}
-              <div className="flex items-start gap-3">
-                <div className="h-[56px] w-[56px] border border-[#e7e7e7] bg-white dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
-                  {/* <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                {/* Region */}
+                <div className="flex items-start gap-3 w-full">
+                  <div className="flex-shrink-0 h-[48px] w-[48px] border border-white/10 bg-white/5 dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
+                    {/* <FaGlobeAmericas className="text-xl text-[#359dff]" /> */}
+                    <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
+                      <use xlinkHref="/sprit/icons.svg#blue-globe"></use>
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-5">
+                      Region: <strong>{product.region}</strong>
+                    </p>
+                    <a className="text-xs text-[#359dff] mt-1 inline-block">
+                      Check Region
+                    </a>
+                  </div>
+                </div>
+
+                {/* Platform */}
+                <div className="flex items-start gap-3 w-full">
+                  <div className="flex-shrink-0 h-[48px] w-[48px] border border-white/10 bg-white/5 dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
+                    {/* <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                     <rect width="32" height="32" rx="8" fill="#FAA41A" />
                     <path d="M25.8815 18.6765H22.0481L21.4404 14.8549L19.1939 18.6497H18.7739C18.5188 18.2104 18.4179 17.5673 18.4179 17.1735C18.4179 16.5206 18.4648 15.8841 18.4648 15.0556C18.4648 13.9568 18.1418 13.367 17.28 13.1598V13.1273C19.1131 12.8724 19.9444 11.6595 19.9444 9.95193C19.9444 7.52591 18.3306 7 16.2156 7H10.525L8.12012 18.3882H11.1442L12.0193 14.2444H14.0294C15.1019 14.2444 15.5402 14.7691 15.5402 15.7732C15.5402 16.537 15.4606 17.1417 15.4606 17.7298C15.4606 17.9477 15.51 18.4535 15.6568 18.6497C15.6553 18.6497 17.8426 20.9562 17.8426 20.9562L15.9622 25L19.9844 22.6102L22.9816 24.9127L22.4221 21.0977L25.8815 18.6765ZM14.9332 12.1124H12.5296L13.1054 9.36687H15.3417C16.1379 9.36687 16.9661 9.57399 16.9661 10.5484C16.9661 11.7766 16.0228 12.1124 14.9332 12.1124Z" fill="black" />
                     <path d="M20.0264 21.9386L17.225 23.6018L18.5072 20.848L16.948 19.2058H19.512L21.1338 16.4658L21.573 19.233H24.1166L21.8235 20.8376L22.2332 23.6353L20.0264 21.9386Z" fill="white" />
                   </svg> */}
-                  {platformIcons[product.platformIcons] ? (
-                    <svg
-                      className="w-[32px] h-[32px] text-blue-500 fill-current"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <use href={platformIcons[product.platformIcons]} />
-                    </svg>
-                  ) : (
-                    // <svg
-                    //   className="w-[32px] h-[32px] text-gray-400 fill-current"
-                    //   xmlns="http://www.w3.org/2000/svg"
-                    // >
-                    //   <use href="/sprit/icons.svg#unknown" />
-                    // </svg>
-                    <Image
-                      src={platform_icon_svg}
-                      alt="Platform Icon"
-                      width={40}
-                      height={40}
-                    />
-                  )}
+                    {platformIcons[product.platformIcons] ? (
+                      <svg
+                        className="w-[32px] h-[32px] text-blue-500 fill-current"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <use href={platformIcons[product.platformIcons]} />
+                      </svg>
+                    ) : (
+                      // <svg
+                      //   className="w-[32px] h-[32px] text-gray-400 fill-current"
+                      //   xmlns="http://www.w3.org/2000/svg"
+                      // >
+                      //   <use href="/sprit/icons.svg#unknown" />
+                      // </svg>
+                      <Image
+                        src={platform_icon_svg}
+                        alt="Platform Icon"
+                        width={40}
+                        height={40}
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-5">
+                      Platform: <strong>{product.platform_image}</strong>
+                    </p>
+                    <a className="text-xs text-[#359dff] mt-1 inline-block">
+                      Activation Guide
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs lg:text-sm">
-                    Platform: <strong>{product.platform_image}</strong>
-                  </p>
-                  <a href="#" className="text-[#359dff] text-xs">
-                    Activation Guide
-                  </a>
-                </div>
-              </div>
 
-              {/* Operating System */}
-              <div className="flex items-start gap-3">
-                <div className="h-[56px] w-[56px] border border-[#e7e7e7] bg-white dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
-                  {/* <LuLaptopMinimalCheck className="text-xl text-[#359dff]" /> */}
-                  <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
-                    <use xlinkHref="/sprit/icons.svg#screen-check"></use>
-                  </svg>
+                {/* Operating System */}
+                <div className="flex items-start gap-3 w-full">
+                  <div className="flex-shrink-0 h-[48px] w-[48px] border border-white/10 bg-white/5 dark:bg-[#1a1a1a] rounded-xl flex items-center justify-center">
+                    {/* <LuLaptopMinimalCheck className="text-xl text-[#359dff]" /> */}
+                    <svg className="w-[32px] h-[32px] text-blue-500 fill-current">
+                      <use xlinkHref="/sprit/icons.svg#screen-check"></use>
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-5">
+                      Works on: <strong>{product.workPlatform}</strong>
+                    </p>
+                    <a className="text-xs text-[#359dff] mt-1 inline-block">
+                      System Requirements
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs lg:text-sm">
-                    Works on: <strong>{product.workPlatform}</strong>
-                  </p>
-                  <a href="#" className="text-[#359dff] text-xs">
-                    System Requirements
-                  </a>
-                </div>
+
               </div>
             </div>
-            <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div>
+
+            <div className="border-t border-neutral-800"></div>
             {/* Region Selector */} {/* i will show it for dekstop only */}
+            
             <div className="flex items-center gap-4 mt-4">
               <span className="text-sm text-gray-400">Region</span>
               <div ref={dropdownRef} className="relative w-[340px]">
@@ -878,7 +913,28 @@ export default function ProductPage({ product, regionsData }) {
 
           {/* Right: Pricing Box - Shows on xl screens or as last column on lg */}
           {/* <div className="w-full md:w-[380px] bg-[#111111] rounded-2xl p-4 space-y-4 text-white"> */}
-          <div className="w-full max-w-md mx-auto bg-gradient-to-br from-[#111] to-[#1a1a1a] p-4 rounded-2xl shadow-lg border border-neutral-800 mt-6 self-start sticky top-6">
+          {/* <div className="w-full lg:max-w-[320px] xl:max-w-[360px] 2xl:max-w-[380px] mx-auto bg-gradient-to-br from-[#111] to-[#1a1a1a] p-4 rounded-2xl shadow-lg border border-neutral-800 mt-6 self-start sticky top-6"> */}
+          <div className="
+w-full
+lg:max-w-[320px]
+xl:max-w-[360px]
+2xl:max-w-[380px]
+mx-auto
+bg-gradient-to-br
+from-[#111]
+to-[#1a1a1a]
+p-4
+rounded-2xl
+shadow-lg
+border
+border-neutral-800
+mt-6
+lg:mt-12
+xl:mt-6
+self-start
+sticky
+top-6
+">
             {/* Featured Offer */}
             <div>
               <p className="text-xs text-white/70 uppercase font-medium mb-1">
@@ -1646,7 +1702,7 @@ p-3
             Add to cart
           </button>
         </div>
-      </div>
+      </div >
     </>
   );
 }
