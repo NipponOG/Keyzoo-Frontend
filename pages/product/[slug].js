@@ -30,7 +30,7 @@ import { platformIcons } from "@/lib/platformIcons";
 import HoverCard from "@/components/HoverCard";
 // import { getStrapiMedia } from "@/lib/media";
 import { getStrapiMedia } from '@/lib/getStrapiMedia';
-import ProductCardImage from '@/components/ProductCardImage';
+import RegionFlag from '@/components/RegionFlag';
 import redis from "@/lib/redis";
 
 // export async function getServerSideProps({ params }) {
@@ -707,208 +707,109 @@ xl:mx-0
 
             <div className="border-t border-neutral-800"></div>
             {/* Region Selector */} {/* i will show it for dekstop only */}
-            
-            <div className="flex items-center gap-4 mt-4">
-              <span className="text-sm text-gray-400">Region</span>
-              <div ref={dropdownRef} className="relative w-[340px]">
-                {/* Trigger */}
-                <button
-                  onClick={() => setRegionOpen(!regionOpen)}
-                  className="w-full bg-[#1a1a1a] border border-[#2e2e2e] text-white px-4 py-2 rounded-lg flex items-center justify-between h-[25px] lg:h-[50px]"
-                >
-                  <span className="text-sm">
-                    {selectedRegion || "Select Region"}
-                  </span>
 
-                  <svg
-                    className={`w-4 h-4 transition-transform ${regionOpen ? "rotate-180" : ""}`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
+            <div className="mt-">
+              <div className="bg-[#171717] border border-white/10 rounded-2xl p-5 flex items-center gap-5">
+                <h3 className="text-sm font-semibold text-white mb-4">
+                  Available Region
+                </h3>
+                <div ref={dropdownRef} className="relative w-[340px]">
+                  {/* Trigger */}
+                  <button
+                    onClick={() => setRegionOpen(!regionOpen)}
+                    // className="w-full bg-[#1a1a1a] border border-[#2e2e2e] text-white px-4 py-2 rounded-lg flex items-center justify-between h-[25px] lg:h-[50px]"
+                    className="
+w-full
+h-[54px]
+px-5
+bg-[#111]
+border
+border-white/10
+rounded-xl
+flex
+items-center
+justify-between
+hover:border-purple-500/40
+transition-all
+duration-300
+"
                   >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
+                    {/* <div className="flex items-center gap-3">
 
-                {/* Dropdown */}
-                {regionOpen && (
-                  <div className="absolute z-50 mt-2 w-full bg-[#2a2a2a] rounded-xl shadow-2xl border border-white/10">
-                    {/* Search */}
-                    <div className="p-3 border-b border-white/10">
-                      <input
-                        autoFocus
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search region..."
-                        className="w-full bg-[#1f1f1f] text-white text-sm px-3 py-2 rounded-md outline-none"
-                      />
+                      <FaGlobeAmericas className="text-[#359dff] text-lg" />
+
+                      <span className="font-medium">
+                        {selectedRegion || "Select Region"}
+                      </span>
+
+                    </div> */}
+
+                    <div className="flex items-center gap-3">
+                      <RegionFlag region={selectedRegion} />
+                      <span>{selectedRegion}</span>
                     </div>
 
-                    {/* Options */}
-                    <div className="max-h-[220px] overflow-y-auto no-scrollbar">
-                      {filteredRegions.length > 0 ? (
-                        filteredRegions.map((region) => (
-                          <button
-                            key={region}
-                            onClick={() => {
-                              handleRegionChange(region);
-                              setSearch("");
-                            }}
-                            className={`w-full text-left px-4 py-3 text-sm transition uppercase
+                    <svg
+                      className={`w-4 h-4 transition-transform ${regionOpen ? "rotate-180" : ""}`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown */}
+                  {regionOpen && (
+                    <div className="absolute z-50 mt-2 w-full bg-[#171717] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                      {/* Search */}
+                      <div className="p-3 border-b border-white/10">
+                        <input
+                          autoFocus
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder="Search region..."
+                          className="w-full bg-[#1f1f1f] text-white text-sm px-3 py-2 rounded-md outline-none"
+                        />
+                      </div>
+
+                      {/* Options */}
+                      <div className="max-h-[220px] overflow-y-auto no-scrollbar">
+                        {filteredRegions.length > 0 ? (
+                          filteredRegions.map((region) => (
+                            <button
+                              key={region}
+                              onClick={() => {
+                                handleRegionChange(region);
+                                setSearch("");
+                              }}
+                              className={`w-full text-left px-4 py-3 text-sm transition uppercase flex items-center gap-3
                     ${selectedRegion === region
-                                ? "bg-[#3a3a3a] text-white"
-                                : "text-white/90 hover:bg-[#3a3a3a]"
-                              }
+                                  ? "bg-[#6b3bfc] text-white"
+                                  : "text-white/90 hover:bg-white/5"
+                                }
                   `}
-                          >
-                            {region}
-                            {/* {selectedRegion === region && (
+                            ><RegionFlag region={region} />
+                              {region}
+                              {/* {selectedRegion === region && (
                               <span className="text-green-400">✓</span>
                             )} */}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-4 py-3 text-sm text-white/50">
-                          No region found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div>
-            {/* <div className="mt-4 lg:mt-6">
-              {/* <h3 className="text-xs lg:text-sm text-white/60 mb-2">Edition:</h3> */}
-            {/* <div className="flex flex-col sm:flex-row gap-3">
-                {/* Option 1 */}
-            {/* <label className="w-full sm:w-[200px] cursor-pointer">
-                  <input
-                    type="radio"
-                    name="edition"
-                    value="premium"
-                    className="peer sr-only"
-                    defaultChecked
-                  />
-                  <div className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-white">Premium Online</span>
-                      <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div>
-                    </div>
-                    <div className="mt-1 text-xs text-white/50">from ₹1,024.45</div>
-                  </div>
-                </label> */}
-            {/* Option 2 */}
-            {/* <label className="w-full sm:w-[200px] cursor-pointer">
-                  <input
-                    type="radio"
-                    name="edition"
-                    value="standard"
-                    className="peer sr-only"
-                  />
-                  <div className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-white">Standard</span>
-                      <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div>
-                    </div>
-                    <div className="mt-1 text-xs text-white/50">from ₹1,092.34</div>
-                  </div>
-                </label> */}
-            {/* </div> */}
-            {/* </div> */}
-            {product.var_title && (
-              <div className="mt-4 lg:mt-4.5">
-                <h3 className="text-xs lg:text-sm text-white/60 mb-4.5">
-                  Edition:
-                </h3>
-
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {uniqueEditions?.map((edition) => {
-                    const isAvailable = edition.Available; // or whatever field indicates availability
-
-                    return (
-                      <label
-                        key={edition.slug}
-                        className={`w-full sm:w-[200px] cursor-pointer select-none ${isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
-                      >
-                        <input
-                          type="radio"
-                          name="edition"
-                          value={edition.slug}
-                          className="peer sr-only"
-                          checked={selectedSlug === edition.slug}
-                          disabled={!isAvailable}
-                          // onChange={() => {
-                          //   setSelectedSlug(product.slug);
-                          //   router.push(`/product/${product.slug}`);
-                          // }}
-                          onChange={() => {
-                            if (!isAvailable) return;
-                            if (edition.slug === selectedSlug) return;
-
-                            const matched = allVariants.find(
-                              (p) =>
-                                p.var_title === edition.var_title &&
-                                p.region?.toLowerCase() ===
-                                selectedRegion?.toLowerCase(),
-                            );
-
-                            if (!matched) {
-                              toast("This combination is not available");
-                              return;
-                            }
-
-                            router.push(`/product/${matched.slug}`);
-                          }}
-                        />
-
-                        <div
-                          className={`p-4 rounded-xl border bg-[#1a1a1a] transition-all flex flex-col justify-between min-h-[90px]
-                        ${!isAvailable
-                              ? "border-gray-700 bg-[#111] text-white/40"
-                              : selectedSlug === edition.slug
-                                ? "border-purple-500 ring-2 ring-purple-500/40 scale-[1.02]"
-                                : "border-[#2e2e2e] hover:border-purple-400"
-                            }`}
-                        >
-                          {" "}
-                          {/* className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500" */}
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-white flex items-center gap-2">
-                              {edition.var_title}
-
-                              {selectedSlug === edition.slug && isAvailable && (
-                                <span className="text-green-400 text-xs">
-                                  (Current)
-                                </span>
-                              )}
-
-                              {!isAvailable && (
-                                <span className="text-red-400 text-xs">
-                                  (Out of stock)
-                                </span>
-                              )}
-                            </span>{" "}
-                            {/* <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div> */}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-sm text-white/50">
+                            No region found
                           </div>
-                          <div className="mt-1 text-xs text-white/50 h-[16px]">
-                            {isAvailable ? (
-                              <>
-                                from {symbol}
-                                {edition.discountPrice}
-                              </>
-                            ) : (
-                              "Unavailable"
-                            )}
-                          </div>
-                        </div>
-                      </label>
-                    );
-                  })}
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
+
+            {/* <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div> */}
           </div>
 
           {/* Right: Pricing Box - Shows on xl screens or as last column on lg */}
@@ -1065,6 +966,111 @@ top-6
             </div>
           </div>
         </div>
+
+        {/* Edition Block */}
+        {product.var_title && (<div className="
+bg-[#171717]
+border border-white/10
+rounded-2xl
+p-5
+mt-6
+max-w-[1500px]
+mx-auto
+w-full
+">
+          {product.var_title && (
+            <div className="bg-[#171717] border border-white/10 rounded-2xl p-5 mt-5 w-full">
+              <h3 className="text-sm font-semibold text-white mb-4">
+                Available Editions
+              </h3>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                {uniqueEditions?.map((edition) => {
+                  const isAvailable = edition.Available; // or whatever field indicates availability
+
+                  return (
+                    <label
+                      key={edition.slug}
+                      className={`w-full sm:w-[180px] cursor-pointer select-none ${isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
+                    >
+                      <input
+                        type="radio"
+                        name="edition"
+                        value={edition.slug}
+                        className="peer sr-only"
+                        checked={selectedSlug === edition.slug}
+                        disabled={!isAvailable}
+                        // onChange={() => {
+                        //   setSelectedSlug(product.slug);
+                        //   router.push(`/product/${product.slug}`);
+                        // }}
+                        onChange={() => {
+                          if (!isAvailable) return;
+                          if (edition.slug === selectedSlug) return;
+
+                          const matched = allVariants.find(
+                            (p) =>
+                              p.var_title === edition.var_title &&
+                              p.region?.toLowerCase() ===
+                              selectedRegion?.toLowerCase(),
+                          );
+
+                          if (!matched) {
+                            toast("This combination is not available");
+                            return;
+                          }
+
+                          router.push(`/product/${matched.slug}`);
+                        }}
+                      />
+
+                      <div
+                        className={`p-4 rounded-xl border bg-[#1a1a1a] transition-all flex flex-col justify-between min-h-[90px]
+                        ${!isAvailable
+                            ? "border-gray-700 bg-[#111] text-white/40"
+                            : selectedSlug === edition.slug
+                              ? "border-purple-500 ring-2 ring-purple-500/40 scale-[1.02]"
+                              : "border-[#2e2e2e] hover:border-purple-400"
+                          }`}
+                      >
+                        {" "}
+                        {/* className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500" */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-white flex items-center gap-2">
+                            {edition.var_title}
+
+                            {selectedSlug === edition.slug && isAvailable && (
+                              <span className="text-green-400 text-xs">
+                                (Current)
+                              </span>
+                            )}
+
+                            {!isAvailable && (
+                              <span className="text-red-400 text-xs">
+                                (Out of stock)
+                              </span>
+                            )}
+                          </span>{" "}
+                          {/* <div className="w-4 h-4 rounded-full border-2 border-white/60 peer-checked:border-purple-500"></div> */}
+                        </div>
+                        <div className="mt-1 text-xs text-white/50 h-[16px]">
+                          {isAvailable ? (
+                            <>
+                              from {symbol}
+                              {edition.discountPrice}
+                            </>
+                          ) : (
+                            "Unavailable"
+                          )}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>)}
 
         {/* Image Gallery */}
         <div className="bg-[#1a1a1a] p-3 lg:p-4 rounded-xl mt-4 lg:mt-6 text-xs lg:text-sm border border-[#2a2a2a] max-w-[1500px] mx-auto">
@@ -1667,6 +1673,7 @@ top-6
           </>
           {/* )} */}
         </div>
+
         <div className="
 fixed
 bottom-0
@@ -1702,6 +1709,7 @@ p-3
             Add to cart
           </button>
         </div>
+        
       </div >
     </>
   );
