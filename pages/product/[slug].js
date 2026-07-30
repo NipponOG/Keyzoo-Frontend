@@ -552,28 +552,12 @@ export default function ProductPage({ product, regionsData }) {
           </div>
 
           {/* Middle: Game Info - Flex column */}
-          <div className="
-flex
-flex-col
-gap-2
-w-full
-min-w-0
-xl:mx-0
-">
+          <div className="flex flex-col gap-2 w-full min-w-0 xl:mx-0">
             {" "}
             {/* mx-auto is the problem we need to fix it leater */}
             <h1
               title={product.title}
-              className="
-    text-lg
-    lg:text-[18px]
-    xl:text-[20px]
-    font-bold
-    leading-tight
-    line-clamp-2
-    break-words
-  "
-            >
+              className="text-lg lg:text-[18px] xl:text-[20px] font-bold leading-tight line-clamp-2 break-words">
               {product.title}
             </h1>
             {/* Tags + Ratings */}
@@ -601,6 +585,7 @@ xl:mx-0
                 {/* ⭐⭐⭐⭐⭐ <span className="text-white">69 Ratings</span> */}
               </div>
             </div>
+            
             {/* this is a devider for visual balance */}
             <div className="border-t border-neutral-800 mt-4"></div>
 
@@ -706,8 +691,8 @@ xl:mx-0
             </div>
 
             <div className="border-t border-neutral-800"></div>
-            {/* Region Selector */} {/* i will show it for dekstop only */}
 
+            {/* Region Selector */} {/* i will show it for dekstop only */}
             <div className="mt-">
               <div className="bg-[#171717] border border-white/10 rounded-2xl p-5 flex items-center gap-5">
                 <h3 className="text-sm font-semibold text-white mb-4">
@@ -810,6 +795,7 @@ duration-300
             </div>
 
             {/* <div className="border-t border-neutral-800 mt-3 lg:mt-4"></div> */}
+
           </div>
 
           {/* Right: Pricing Box - Shows on xl screens or as last column on lg */}
@@ -1709,7 +1695,7 @@ p-3
             Add to cart
           </button>
         </div>
-        
+
       </div >
     </>
   );
