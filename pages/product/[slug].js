@@ -140,6 +140,8 @@ export async function getServerSideProps({ params }) {
 
 export default function ProductPage({ product, regionsData }) {
 
+  // State and hooks...
+
   // Destructure minimum and recommended requirements safely and languages also...
   const minimumRequirements = product?.minimumRequirement || {};
   const recommendedRequirements = product?.recommendedRequirement || {};
@@ -585,7 +587,7 @@ export default function ProductPage({ product, regionsData }) {
                 {/* ⭐⭐⭐⭐⭐ <span className="text-white">69 Ratings</span> */}
               </div>
             </div>
-            
+
             {/* this is a devider for visual balance */}
             <div className="border-t border-neutral-800 mt-4"></div>
 
@@ -800,8 +802,8 @@ duration-300
 
           {/* Right: Pricing Box - Shows on xl screens or as last column on lg */}
           {/* <div className="w-full md:w-[380px] bg-[#111111] rounded-2xl p-4 space-y-4 text-white"> */}
-          {/* <div className="w-full lg:max-w-[320px] xl:max-w-[360px] 2xl:max-w-[380px] mx-auto bg-gradient-to-br from-[#111] to-[#1a1a1a] p-4 rounded-2xl shadow-lg border border-neutral-800 mt-6 self-start sticky top-6"> */}
-          <div className="
+          <div className="w-full lg:max-w-[320px] xl:max-w-[360px] 2xl:max-w-[380px] mx-auto bg-gradient-to-br from-[#111] to-[#1a1a1a] p-4 rounded-2xl shadow-lg border border-neutral-800 mt-6 self-start sticky top-6">
+            {/* <div className="
 w-full
 lg:max-w-[320px]
 xl:max-w-[360px]
@@ -821,7 +823,7 @@ xl:mt-6
 self-start
 sticky
 top-6
-">
+"> */}
             {/* Featured Offer */}
             <div>
               <p className="text-xs text-white/70 uppercase font-medium mb-1">
