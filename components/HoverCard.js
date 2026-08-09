@@ -5,18 +5,18 @@ export default function HoverCard({ title, children }) {
 
     const [open, setOpen] = useState(false);
     const arrowRef = useRef(null);
-    let timeout;
+    const timeoutRef = useRef();
 
-    const isLongTitle = title.length > 100;
+    const isLongTitle = (title?.length ?? 0) > 100;
 
     const openTooltip = () => {
-        timeout = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             setOpen(true);
         }, 50);
     };
 
     const closeTooltip = () => {
-        clearTimeout(timeout);
+        clearTimeout(timeoutRef.current);
         setOpen(false);
     };
 
@@ -51,7 +51,9 @@ export default function HoverCard({ title, children }) {
                     <div
                         ref={refs.setFloating}
                         style={floatingStyles}
-                        className="z-[9999] w-[300px] rounded-lg bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 shadow-black/40 px-4 py-3 text-sm text-white pointer-events-none transition-opacity duration-150">
+                        // className="z-[9999] min-w-[50px] break-words rounded-lg bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 shadow-black/40 px-4 py-3 text-sm text-white pointer-events-none transition-opacity duration-150">
+                        className="z-[9999] max-w-[300px] w-fit break-words rounded-lg bg-[#1c1c1e]/95 backdrop-blur-md border border-white/10 shadow-black/40 px-4 py-3 text-sm text-white pointer-events-none transition-opacity duration-150"
+                    >
                         {/* 🔺 ARROW */}
                         <div
                             ref={arrowRef}

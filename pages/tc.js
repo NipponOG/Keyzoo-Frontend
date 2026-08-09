@@ -11,7 +11,7 @@ import ProfitCard from "@/components/dashboard/ProfitCard";
 import ActiveOffersCard from "@/components/dashboard/ActiveOffersCard";
 import ProductInventoryRow from "@/components/dashboard/ProductInventoryRow";
 import InventoryCard from "@/components/dashboard/InventoryCard";
-import { MdContentCopy } from "react-icons/md";
+import { MdContentCopy, MdCached } from "react-icons/md";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import GlassCard from "@/components/GlassCard";
@@ -338,6 +338,28 @@ export default function Dashboard() {
         await fetchOrders();
         await fetchDashboardStats();
 
+    };
+
+    const handleClearFullCache = async () => {
+        const confirmed = window.confirm(
+            "Are you sure you want to clear the entire cache?"
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const data = await adminFetch("/api/admin/cache/clear", {
+                method: "POST",
+            });
+
+            alert(data.message || "✅ Full cache cleared successfully!");
+        } catch (error) {
+            console.error("Cache clear error:", error);
+
+            alert(
+                error.message || "❌ Failed to clear cache"
+            );
+        }
     };
 
     // const handleInvoice = async (orderId) => {
@@ -696,9 +718,37 @@ export default function Dashboard() {
                                 </p>
                             </div>
 
-                            <Link
-                                href="/admin/settings"
-                                className="
+                            <div className="flex items-center gap-4">
+                                <span
+                                    onClick={handleClearFullCache}
+                                    className="
+        group
+        flex
+        h-12
+        w-12
+        items-center
+        justify-center
+        rounded-2xl
+        border
+        border-white/10
+        bg-[#1d1d1d]
+        text-gray-400
+        transition-all
+        duration-200
+        hover:border-indigo-500/40
+        hover:bg-indigo-500/10
+        hover:text-indigo-400
+    "
+                                    title="Clear Cache"
+                                >
+                                    <MdCached
+                                        size={30}
+                                        className="transition-transform duration-300 group-hover:rotate-90"
+                                    />
+                                </span>
+                                <Link
+                                    href="/admin/settings"
+                                    className="
             group
             flex
             h-12
@@ -716,14 +766,14 @@ export default function Dashboard() {
             hover:bg-indigo-500/10
             hover:text-indigo-400
         "
-                                title="Settings"
-                            >
-                                <FiSettings
-                                    size={22}
-                                    className="transition-transform duration-300 group-hover:rotate-90"
-                                />
-                            </Link>
-
+                                    title="Settings"
+                                >
+                                    <FiSettings
+                                        size={22}
+                                        className="transition-transform duration-300 group-hover:rotate-90"
+                                    />
+                                </Link>
+                            </div>
                         </div>
 
                         {/* <MetricCards /> */}
@@ -1389,6 +1439,6 @@ shadow-lg
                     <ScrollToTopButton />
                 </div>
             </ >
-        </AdminGuard>
+        </AdminGuard >
     );
 }

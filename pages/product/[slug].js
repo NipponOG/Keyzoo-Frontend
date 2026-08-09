@@ -140,8 +140,6 @@ export async function getServerSideProps({ params }) {
 
 export default function ProductPage({ product, regionsData }) {
 
-  // State and hooks...
-
   // Destructure minimum and recommended requirements safely and languages also...
   const minimumRequirements = product?.minimumRequirement || {};
   const recommendedRequirements = product?.recommendedRequirement || {};
@@ -1025,7 +1023,10 @@ w-full
                         {/* className="p-3 rounded-xl border border-[#2e2e2e] bg-[#1a1a1a] peer-checked:border-purple-500" */}
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-semibold text-white flex items-center gap-2">
-                            {edition.var_title}
+
+                            <HoverCard title={edition.var_title}>
+                              {edition.var_title}
+                            </HoverCard>
 
                             {selectedSlug === edition.slug && isAvailable && (
                               <span className="text-green-400 text-xs">
