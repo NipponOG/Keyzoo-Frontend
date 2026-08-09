@@ -26,6 +26,7 @@ import { useRef } from "react";
 import adminFetch from "@/lib/adminFetch";
 import { FiSettings } from "react-icons/fi";
 import Link from "next/link";
+import ClearCacheModal from "@/components/dashboard/ClearCacheModal";
 
 export default function Dashboard() {
 
@@ -54,6 +55,10 @@ export default function Dashboard() {
     const [inventoryExpanded, setInventoryExpanded] = useState(false);
 
     const [inventorySearch, setInventorySearch] = useState("");
+
+    // Cache clearing state
+    const [showClearCacheModal, setShowClearCacheModal] = useState(false);
+    const [clearingCache, setClearingCache] = useState(false);
 
     const parentRef = useRef(null);
     const inventorySearchRef = useRef(null);
@@ -341,25 +346,36 @@ export default function Dashboard() {
     };
 
     const handleClearFullCache = async () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to clear the entire cache?"
-        );
-
-        if (!confirmed) return;
 
         try {
-            const data = await adminFetch("/api/admin/cache/clear", {
-                method: "POST",
-            });
 
-            alert(data.message || "✅ Full cache cleared successfully!");
+            setClearingCache(true);
+
+            const data = await adminFetch(
+                "/api/admin/cache/clear",
+                {
+                    method: "POST",
+                }
+            );
+
+            console.log("Cache cleared:", data);
+
+            setShowClearCacheModal(false);
+
         } catch (error) {
+
             console.error("Cache clear error:", error);
 
             alert(
-                error.message || "❌ Failed to clear cache"
+                error.message || "Failed to clear cache"
             );
+
+        } finally {
+
+            setClearingCache(false);
+
         }
+
     };
 
     // const handleInvoice = async (orderId) => {
@@ -720,7 +736,7 @@ export default function Dashboard() {
 
                             <div className="flex items-center gap-4">
                                 <span
-                                    onClick={handleClearFullCache}
+                                    onClick={() => setShowClearCacheModal(true)}
                                     className="
         group
         flex
@@ -1436,6 +1452,12 @@ shadow-lg
 
                         </div>
                     </div>
+                    <ClearCacheModal
+                        open={showClearCacheModal}
+                        onClose={() => setShowClearCacheModal(false)}
+                        onClear={handleClearFullCache}
+                        clearing={clearingCache}
+                    />
                     <ScrollToTopButton />
                 </div>
             </ >
