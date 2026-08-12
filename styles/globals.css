@@ -1,6 +1,108 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Style+Script&display=swap');
 
+:root {
+  /* =========================================
+     KEYZOO BRAND COLORS
+     ========================================= */
+
+  /* Primary Brand */
+  --keyzoo-primary: #6D3CFF;
+  --keyzoo-primary-hover: #7C52FF;
+  --keyzoo-primary-active: #5B2BE0;
+  --keyzoo-primary-dark: #4C22C7;
+  --keyzoo-primary-light: #8F6BFF;
+  --keyzoo-primary-soft: #A78BFA;
+
+  /* Purple Backgrounds */
+  --keyzoo-purple-50: #F5F3FF;
+  --keyzoo-purple-100: #EDE9FE;
+  --keyzoo-purple-200: #DDD6FE;
+  --keyzoo-purple-300: #C4B5FD;
+  --keyzoo-purple-400: #A78BFA;
+  --keyzoo-purple-500: #8B5CF6;
+  --keyzoo-purple-600: #6D3CFF;
+  --keyzoo-purple-700: #5B2BE0;
+  --keyzoo-purple-800: #4C22C7;
+  --keyzoo-purple-900: #35158F;
+
+  /* =========================================
+     DARK COLORS
+     ========================================= */
+
+  --keyzoo-black: #0D0D0F;
+  --keyzoo-black-soft: #111114;
+  --keyzoo-bg: #0D0D0F;
+  --keyzoo-bg-secondary: #141416;
+  --keyzoo-bg-card: #18181B;
+  --keyzoo-bg-card-hover: #1D1D22;
+
+  /* =========================================
+     TEXT
+     ========================================= */
+
+  --keyzoo-white: #FFFFFF;
+  --keyzoo-text: #FFFFFF;
+  --keyzoo-text-secondary: #D1D5DB;
+  --keyzoo-text-muted: #9CA3AF;
+  --keyzoo-text-disabled: #6B7280;
+
+  /* =========================================
+     BORDERS
+     ========================================= */
+
+  --keyzoo-border: rgba(255, 255, 255, 0.10);
+  --keyzoo-border-hover: rgba(109, 60, 255, 0.45);
+  --keyzoo-border-active: #6D3CFF;
+
+  /* =========================================
+     GRADIENTS
+     ========================================= */
+
+  --keyzoo-gradient:
+    linear-gradient(135deg, #6D3CFF 0%, #4C22C7 100%);
+
+  --keyzoo-gradient-hover:
+    linear-gradient(135deg, #7C52FF 0%, #5B2BE0 100%);
+
+  --keyzoo-gradient-soft:
+    linear-gradient(135deg,
+      rgba(109, 60, 255, 0.20),
+      rgba(109, 60, 255, 0.05));
+
+  /* =========================================
+     GLOW
+     ========================================= */
+
+  --keyzoo-glow:
+    0 0 30px rgba(109, 60, 255, 0.25);
+
+  --keyzoo-glow-hover:
+    0 0 35px rgba(109, 60, 255, 0.40);
+
+  --keyzoo-glow-strong:
+    0 0 50px rgba(109, 60, 255, 0.50);
+
+  /* =========================================
+     SHADOWS
+     ========================================= */
+
+  --keyzoo-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --keyzoo-shadow-hover:
+    0 15px 40px rgba(0, 0, 0, 0.50);
+
+  /* =========================================
+     STATUS
+     ========================================= */
+
+  --keyzoo-success: #22C55E;
+  --keyzoo-warning: #F59E0B;
+  --keyzoo-danger: #EF4444;
+  --keyzoo-info: #3B82F6;
+}
+
 .script {
   font-family: "Style Script", cursive;
   font-weight: 400;
