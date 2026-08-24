@@ -18,10 +18,11 @@ import useCurrency from "@/hook/useCurrency";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/store/cartSlice";
 import { useRouter } from "next/router";
-// import toast from "react-hot-toast";
+import ProductPageSkeleton from "@/components/ProductPageSkeleton";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import DynamicBreadcrumb from "@/components/DynamicBreadcrumb";
+import { getProductBreadcrumbs } from "@/lib/breadcrumbs";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules"; // ✅ import Navigation
@@ -188,6 +189,24 @@ export default function ProductPage({ product, regionsData }) {
   const router = useRouter();
   const [selectedSlug, setSelectedSlug] = useState(router.query.slug);
 
+  // handle skeleton loading state
+  const [pageLoading, setPageLoading] = useState(false);
+
+  useEffect(() => {
+    const handleStart = () => setPageLoading(true);
+    const handleComplete = () => setPageLoading(false);
+
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+    router.events.on("routeChangeError", handleComplete);
+
+    return () => {
+      router.events.off("routeChangeStart", handleStart);
+      router.events.off("routeChangeComplete", handleComplete);
+      router.events.off("routeChangeError", handleComplete);
+    };
+  }, [router.events]);
+
   // update selectedSlug when slug changes in URL
   useEffect(() => {
     if (router.query.slug) {
@@ -242,6 +261,88 @@ export default function ProductPage({ product, regionsData }) {
   }, [product, router]);
 
   if (!product) return null;
+
+  if (pageLoading) {
+    return <ProductPageSkeleton />;
+  }
+
+  // const buildBreadcrumbs = () => {
+  //   const pathname = router.pathname;
+
+  //   // Normal product
+  //   if (pathname === "/product/[slug]") {
+  //     return [
+  //       {
+  //         label: "Home",
+  //         href: "/",
+  //       },
+  //       {
+  //         label: "Store",
+  //         href: "/store",
+  //       },
+  //       {
+  //         label: "Games",
+  //         href: "/store",
+  //       },
+  //       {
+  //         label: product.title,
+  //       },
+  //     ];
+  //   }
+
+  //   // PSN gift card
+  //   if (pathname === "/store/category/gift-card/psn/[slug]") {
+  //     return [
+  //       {
+  //         label: "Home",
+  //         href: "/",
+  //       },
+  //       {
+  //         label: "Gift Cards",
+  //         href: "/store/category/gift-card",
+  //       },
+  //       {
+  //         label: "PlayStation",
+  //         href: "/store/category/gift-card/psn",
+  //       },
+  //       {
+  //         label: product.title,
+  //       },
+  //     ];
+  //   }
+
+  //   // PSN product
+  //   if (pathname === "/store/category/product/psn/[slug]") {
+  //     return [
+  //       {
+  //         label: "Home",
+  //         href: "/",
+  //       },
+  //       {
+  //         label: "Store",
+  //         href: "/store",
+  //       },
+  //       {
+  //         label: "PlayStation",
+  //         href: "/store/category/product/psn",
+  //       },
+  //       {
+  //         label: product.title,
+  //       },
+  //     ];
+  //   }
+
+  //   // Fallback
+  //   return [
+  //     {
+  //       label: "Home",
+  //       href: "/",
+  //     },
+  //     {
+  //       label: product.title,
+  //     },
+  //   ];
+  // };
 
   const imgUrl = getStrapiMedia(product.image?.url);
   const age = getStrapiMedia(product.age?.url);
@@ -515,6 +616,14 @@ export default function ProductPage({ product, regionsData }) {
       </Head>
 
       <div className="min-h-screen p-4 lg:p-6">
+        <div className="max-w-[1500px] mx-auto">
+          <DynamicBreadcrumb
+            items={getProductBreadcrumbs({
+              pathname: router.pathname,
+              product,
+            })}
+          />
+        </div>
         <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[240px_1fr_320px] xl:grid-cols-[260px_1fr_360px] 2xl:grid-cols-[260px_1fr_380px] gap-4 lg:gap-6 xl:gap-8">
           {/* Left: Cover Image - Fixed width for laptop and up */}
           {/* Left: Cover Image */}
@@ -562,10 +671,10 @@ export default function ProductPage({ product, regionsData }) {
             </h1>
             {/* Tags + Ratings */}
             <div className="flex flex-wrap items-center gap-3 mt-2">
-              <span className="bg-[#5539cc] px-3 py-1 text-xs rounded-full font-medium text-white">
+              <span className="bg-[#5539cc] px-3 py-1 text-xs rounded-full font-medium text-white uppercase">
                 {product.item_type}
               </span>
-              <span className="bg-[#2a2a2a] px-3 py-1 text-xs rounded-full  font-medium text-white">
+              <span className="bg-[#2a2a2a] px-3 py-1 text-xs rounded-full  font-medium text-white uppercase">
                 {product.item}
               </span>
               <div className="flex items-center gap-2 text-yellow-400 ml-0 sm:ml-2">

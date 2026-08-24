@@ -21,6 +21,8 @@ import { useRouter } from "next/router";
 // import toast from "react-hot-toast";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import DynamicBreadcrumb from "@/components/DynamicBreadcrumb";
+import { getProductBreadcrumbs } from "@/lib/breadcrumbs";
 import { formatDate } from "@/lib/date";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -535,6 +537,15 @@ export default function ProductPage({ product, regionsData }) {
             </Head>
 
             <div className="min-h-screen p-4 lg:p-6">
+
+                <div className="max-w-[1500px] mx-auto">
+                    <DynamicBreadcrumb
+                        items={getProductBreadcrumbs({
+                            pathname: router.pathname,
+                            product,
+                        })}
+                    />
+                </div>
 
                 <div className="max-w-[1500px] mx-auto grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[240px_1fr_320px] xl:grid-cols-[260px_1fr_360px] 2xl:grid-cols-[260px_1fr_380px] gap-4 lg:gap-6 xl:gap-8">
 

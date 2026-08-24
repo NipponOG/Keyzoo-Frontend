@@ -73,7 +73,21 @@ const nextConfig = {
             }
         ],
     },
-
+    i18n: {
+        locales: [
+            "en",
+            "de",
+            "fr",
+            "es",
+            "pt",
+            "it",
+            "nl",
+            "ja",
+            "ko",
+            "zh-CN",
+        ],
+        defaultLocale: "en",
+    },
 };
 
 module.exports = nextConfig;

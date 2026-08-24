@@ -9,6 +9,15 @@ import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { useRouter } from "next/router";
 import { getStrapiMedia } from "@/lib/getStrapiMedia";
 import ProductCardImage from "@/components/ProductCardImage";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function index() {
 
@@ -167,6 +176,19 @@ export default function index() {
   };
 
   useEffect(() => {
+    setPage(1);
+  }, [
+    search,
+    selectedPlatforms,
+    selectedRegions,
+    selectedProductTypes,
+    selectedWorksOn,
+    onlyAvailable,
+    minPrice,
+    maxPrice,
+  ]);
+
+  useEffect(() => {
     async function getData() {
       setLoading(true);
 
@@ -192,19 +214,19 @@ export default function index() {
         // 🎮 PRODUCTS
         const products = (productRes.data || []).map((item) => ({
           ...item,
-          type: "product",
+          type: "product",  // Adjust the type(slug) for Product items
         }));
 
         // 🎁 GIFT CARDS
         const giftCards = (giftCardRes.data || []).map((item) => ({
           ...item,
-          type: "gift-card",
+          type: "gift-card",  // Adjust the type(slug) for Gift Card items
         }));
 
         // 🕹️ PLAYSTATION
         const playStations = (playStationRes.data || []).map((item) => ({
           ...item,
-          type: "store/category/product/psn",
+          type: "store/category/product/psn", // Adjust the type(slug) for PlayStation items
         }));
 
         // 🔥 MERGE EVERYTHING
@@ -853,46 +875,77 @@ export default function index() {
 
           </div>
 
-          <div className="flex justify-center mt-10 gap-2 flex-wrap">
+          <Pagination className="mt-10">
+            <PaginationContent>
 
-            {/* PREV */}
-            <button
-              disabled={page === 1}
-              onClick={() => setPage(prev => prev - 1)}
-              className="px-3 py-2 rounded-lg bg-[#1a1a1f] text-white disabled:opacity-40"
-            >
-              ‹
-            </button>
+              {/* Previous */}
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
 
-            {/* PAGE NUMBERS */}
-            {getPages().map((p, i) =>
-              p === "..." ? (
-                <span key={i} className="px-2 text-gray-500">...</span>
-              ) : (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`px-3 py-2 rounded-lg text-sm transition
-                ${p === page
-                      ? "bg-purple-600 text-white"
-                      : "bg-[#1a1a1f] text-gray-300 hover:bg-white/10"
-                    }`}
-                >
-                  {p}
-                </button>
-              )
-            )}
+                    if (page > 1) {
+                      setPage((prev) => prev - 1);
+                    }
+                  }}
+                  className={
+                    page === 1
+                      ? "pointer-events-none opacity-40"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
 
-            {/* NEXT */}
-            <button
-              disabled={page === totalPages}
-              onClick={() => setPage(prev => prev + 1)}
-              className="px-3 py-2 rounded-lg bg-[#1a1a1f] text-white disabled:opacity-40"
-            >
-              ›
-            </button>
+              {/* Page numbers */}
+              {getPages().map((p, index) =>
+                p === "..." ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <span className="flex h-9 min-w-9 items-center justify-center px-2 text-sm text-[var(--keyzoo-text-muted)]">
+                      ...
+                    </span>
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={p}>
+                    <PaginationLink
+                      href="#"
+                      isActive={p === page}
+                      onClick={(e) => {
+                        e.preventDefault();
 
-          </div>
+                        if (p !== page) {
+                          setPage(p);
+                        }
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {p}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+
+              {/* Next */}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    if (page < totalPages) {
+                      setPage((prev) => prev + 1);
+                    }
+                  }}
+                  className={
+                    page === totalPages
+                      ? "pointer-events-none opacity-40"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+            </PaginationContent>
+          </Pagination>
 
         </div>
       </div>
