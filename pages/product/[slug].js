@@ -190,22 +190,22 @@ export default function ProductPage({ product, regionsData }) {
   const [selectedSlug, setSelectedSlug] = useState(router.query.slug);
 
   // handle skeleton loading state
-  const [pageLoading, setPageLoading] = useState(false);
+  // const [pageLoading, setPageLoading] = useState(false);
 
-  useEffect(() => {
-    const handleStart = () => setPageLoading(true);
-    const handleComplete = () => setPageLoading(false);
+  // useEffect(() => {
+  //   const handleStart = () => setPageLoading(true);
+  //   const handleComplete = () => setPageLoading(false);
 
-    router.events.on("routeChangeStart", handleStart);
-    router.events.on("routeChangeComplete", handleComplete);
-    router.events.on("routeChangeError", handleComplete);
+  //   router.events.on("routeChangeStart", handleStart);
+  //   router.events.on("routeChangeComplete", handleComplete);
+  //   router.events.on("routeChangeError", handleComplete);
 
-    return () => {
-      router.events.off("routeChangeStart", handleStart);
-      router.events.off("routeChangeComplete", handleComplete);
-      router.events.off("routeChangeError", handleComplete);
-    };
-  }, [router.events]);
+  //   return () => {
+  //     router.events.off("routeChangeStart", handleStart);
+  //     router.events.off("routeChangeComplete", handleComplete);
+  //     router.events.off("routeChangeError", handleComplete);
+  //   };
+  // }, [router.events]);
 
   // update selectedSlug when slug changes in URL
   useEffect(() => {
@@ -262,9 +262,9 @@ export default function ProductPage({ product, regionsData }) {
 
   if (!product) return null;
 
-  if (pageLoading) {
-    return <ProductPageSkeleton />;
-  }
+  // if (pageLoading) {
+  //   return <ProductPageSkeleton />;
+  // }
 
   // const buildBreadcrumbs = () => {
   //   const pathname = router.pathname;
