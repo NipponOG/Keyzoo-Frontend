@@ -140,7 +140,27 @@ export default function DiscoverByPrice() {
     }
 
     return (
-        <section className="w-full relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-[#111] to-[#1a1a1a] px-4 py-8 sm:px-6 md:px-8 lg:px-10">
+        // <section className="w-full relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-[#111] to-[#1a1a1a] px-4 py-8 sm:px-6 md:px-8 lg:px-10">
+        <section
+            className="
+        w-full
+        relative
+        overflow-hidden
+        rounded-3xl
+        border border-white/5
+        bg-gradient-to-br from-[#111] to-[#1a1a1a]
+        px-4
+        py-10
+        sm:px-6
+        sm:py-12
+        md:px-8
+        md:py-14
+        lg:px-10
+        lg:py-16
+        min-h-0
+        xl:min-h-[560px]
+    "
+        >
 
             {/* Glow Effect */}
             <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-48 h-48 sm:w-72 sm:h-72 bg-purple-500/20 blur-3xl rounded-full pointer-events-none" />
@@ -158,13 +178,13 @@ lg:h-[420px] rounded-full bg-violet-500/15 blur-[120px] pointer-events-none -z-1
                 <div className="absolute top-20 left-20 w-32 h-32 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
 
                 {/* LEFT CONTENT */}
-                <div className="w-full lg:w-[58%] text-center lg:text-left">
+                <div className="w-full xl:w-[52%] text-center xl:text-left">
 
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+                    <h2 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-white">
                         Discover By Price
                     </h2>
 
-                    <p className="text-gray-400 mt-3 text-sm sm:text-base max-w-[500px]">
+                    <p className="text-gray-400 mt-3 text-sm sm:text-base max-w-[500px] mx-auto xl:mx-0">
                         Find the best gaming deals instantly based on your budget.
                     </p>
 
@@ -205,34 +225,35 @@ lg:h-[420px] rounded-full bg-violet-500/15 blur-[120px] pointer-events-none -z-1
                 </div>
 
                 {/* RIGHT ILLUSTRATION */}
-                <div className="relative w-full lg:w-[42%] flex justify-center mt-6 lg:mt-0">
-
-                    <div className="relative magic-vortex">
-
+                {/* <div className="relative w-full lg:w-[42%] flex justify-center mt-6 lg:mt-0"> */}
+                <div
+                    className="
+        hidden
+        xl:flex
+        xl:w-[48%]
+        justify-center
+        items-center
+        xl:mt-0
+        min-h-[500px]
+        pr-2
+    "
+                >
+                    <div className="relative w-full flex justify-center items-center">
                         <Image
-                            src="/discover-energy.png"
-                            alt="Energy Artwork"
-                            width={620}
-                            height={620}
+                            src="/confused.png"
+                            alt="Discover games by price"
+                            width={650}
+                            height={650}
                             className="
-                                object-contain
-                                opacity-80
-                                scale-100
-                                sm:scale-110
-                                lg:scale-125
-                                max-w-[520px] {/*need change here*/}
-                                sm:max-w-[620px]
-                                lg:max-w-[720px]
-                                h-auto
-                                drop-shadow-[0_0_100px_rgba(120,119,255,0.45)]
-                                select-none
-                                pointer-events-none
-        
-                            "
+                object-contain
+                w-full
+                max-w-[620px]
+                h-auto
+                select-none
+                pointer-events-none
+            "
                         />
-
                     </div>
-
                 </div>
 
             </div>

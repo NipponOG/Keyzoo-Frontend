@@ -69,7 +69,7 @@ const nextConfig = {
             },
             {
                 protocol: 'https',   // Use http for local development or specific vps server
-                hostname: 'ik.imagekit.io',
+                hostname: 'img.youtube.com',
             }
         ],
     },

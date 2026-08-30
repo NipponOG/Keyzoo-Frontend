@@ -191,9 +191,12 @@ export default function AdBannerSection() {
                 );
 
                 const logoUrl = getStrapiMedia(ad.logo?.url);
-                const trailerVideo = getStrapiMedia(ad.trailer?.url);
-                // const trailerPreview = ad.trailer?.previewUrl;
-                const trailerPreview = ad.trailer?.url ? ad.trailer.url.replace(".mp4", ".jpg") : null;
+
+                const youtubeVideoId = ad.youtubeVideoId;
+
+                const trailerPreview = youtubeVideoId
+                    ? `https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`
+                    : imgUrl;
 
                 return (
                     <section
@@ -240,45 +243,139 @@ export default function AdBannerSection() {
                                 </p>
 
                                 {/* 🎬 TRAILER (VIDEO PREVIEW) */}
-                                {trailerVideo && (
-                                    <div className="flex justify-center mb-6 gap-5">
-                                        <div
-                                            onClick={() => setActiveVideo(trailerVideo)}
-                                            className="relative w-full max-w-md rounded-xl overflow-hidden group cursor-pointer"
+                                {youtubeVideoId && (
+                                    <div className="flex justify-center mb-6">
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveVideo(youtubeVideoId)}
+                                            className="
+                relative
+                w-full
+                max-w-md
+                aspect-video
+                rounded-xl
+                overflow-hidden
+                group
+                cursor-pointer
+                bg-black
+                text-left
+            "
+                                            aria-label="Play trailer"
                                         >
                                             <Image
-                                                src={trailerPreview || imgUrl}
-                                                alt="Trailer"
-                                                width={500}
-                                                height={300}
-                                                className="object-cover group-hover:scale-105 transition duration-300"
+                                                src={trailerPreview}
+                                                alt="Game trailer"
+                                                fill
+                                                className="
+                    object-cover
+                    group-hover:scale-105
+                    transition-transform
+                    duration-500
+                "
                                             />
 
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                                                <div className="text-white text-3xl"><IoPlay /></div>
+                                            {/* Dark overlay */}
+                                            <div className="
+                absolute
+                inset-0
+                bg-black/35
+                group-hover:bg-black/50
+                transition
+            " />
+
+                                            {/* Play button */}
+                                            <div className="
+                absolute
+                inset-0
+                flex
+                items-center
+                justify-center
+            ">
+                                                <div className="
+                    w-16
+                    h-16
+                    rounded-full
+                    bg-white/95
+                    text-black
+                    flex
+                    items-center
+                    justify-center
+                    shadow-2xl
+                    group-hover:scale-110
+                    transition-transform
+                ">
+                                                    <IoPlay className="text-2xl ml-1" />
+                                                </div>
                                             </div>
-                                        </div>
+                                        </button>
                                     </div>
                                 )}
 
                                 {activeVideo && (
-                                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-                                        <div className="w-[90%] max-w-3xl">
+                                    <div
+                                        className="
+            fixed
+            inset-0
+            z-[100]
+            bg-black/90
+            backdrop-blur-sm
+            flex
+            items-center
+            justify-center
+            p-4
+        "
+                                        onClick={() => setActiveVideo(null)}
+                                    >
+                                        <div
+                                            className="relative w-full max-w-5xl"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
 
-                                            <video
-                                                controls
-                                                autoPlay
-                                                className="w-full rounded-lg"
-                                            >
-                                                <source src={activeVideo} type="video/mp4" />
-                                            </video>
-
+                                            {/* Close */}
                                             <button
+                                                type="button"
                                                 onClick={() => setActiveVideo(null)}
-                                                className="mt-4 text-white"
+                                                className="
+                    absolute
+                    -top-12
+                    right-0
+                    z-10
+                    w-10
+                    h-10
+                    flex
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-white/10
+                    hover:bg-white/20
+                    text-white
+                    transition
+                "
+                                                aria-label="Close trailer"
                                             >
-                                                <IoMdCloseCircleOutline className="text-5xl" />
+                                                <IoMdCloseCircleOutline className="text-3xl" />
                                             </button>
+
+                                            {/* YouTube Player */}
+                                            <div className="
+                relative
+                w-full
+                aspect-video
+                overflow-hidden
+                rounded-2xl
+                bg-black
+                shadow-2xl
+            ">
+                                                <iframe
+                                                    key={activeVideo}
+                                                    className="w-full h-full"
+                                                    src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0`}
+                                                    title="Game Trailer"
+                                                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                                                    allowFullScreen
+                                                    referrerPolicy="strict-origin-when-cross-origin"
+                                                />
+                                            </div>
 
                                         </div>
                                     </div>
