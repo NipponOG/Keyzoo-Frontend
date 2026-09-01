@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAdmin } from "@/context/AdminContext";
 import { loginPasskey } from "@/lib/passkey";
+import { HugeiconsIcon } from '@hugeicons/react';
+import { FingerAccessIcon, AuthorizedIcon } from '@hugeicons/core-free-icons';
 
 export default function AdminLogin() {
 
@@ -218,9 +220,10 @@ export default function AdminLogin() {
 
                 <button
                     disabled={loading}
-                    className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 py-3 text-white font-medium transition"
+                    className="w-full rounded-lg bg-indigo-600 hover:bg-indigo-500 py-3 text-white font-medium transition flex items-center justify-center gap-2"
                 >
 
+                    <HugeiconsIcon icon={AuthorizedIcon} />
                     {loading
                         ? "Signing In..."
                         : "Sign In"}
@@ -237,8 +240,9 @@ export default function AdminLogin() {
                     type="button"
                     onClick={handlePasskeyLogin}
                     disabled={loading}
-                    className="w-full rounded-lg border border-[#333] bg-[#232323] py-3 text-white transition hover:bg-[#2b2b2b]"
+                    className="w-full rounded-lg border border-[#333] bg-[#232323] py-3 text-white transition hover:bg-[#2b2b2b] flex items-center justify-center gap-2 "
                 >
+                    <HugeiconsIcon icon={FingerAccessIcon} />
                     Sign in with Passkey
                 </button>
 

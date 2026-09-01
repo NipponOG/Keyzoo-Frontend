@@ -1,9 +1,12 @@
 // components/Footer.js
 
 'use client';
+
 import { React, useState, useEffect } from 'react';
 import Image from 'next/image';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { FaFacebookF, FaInstagram, FaTwitter, FaYoutube, FaDiscord } from 'react-icons/fa';
+import { MetaIcon, InstagramIcon, NewTwitterIcon, YoutubeIcon, DiscordIcon, CopyrightIcon } from '@hugeicons/core-free-icons';
 import { useTheme } from 'next-themes';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import ThemeToggle from './ThemeToggle';
@@ -38,11 +41,11 @@ export default function Footer() {
         <div className="space-y-6 flex flex-col items-center md:items-start text-center md:text-left">
           <div>
             {/* Trustpilot logo */}
-            <Image src="/icons/trust.svg" alt="Trustpilot" width={120} height={40} className='inline'/>
+            <Image src="/icons/trust.svg" alt="Trustpilot" width={120} height={40} className='inline' />
 
             {/* Stars SVG below logo */}
             <div className="mt-3">
-              <Image src="/icons/star.svg" alt="Trustpilot Stars" width={100} height={20} className='inline'/>
+              <Image src="/icons/star.svg" alt="Trustpilot Stars" width={100} height={20} className='inline' />
             </div>
 
             {/* Review Text */}
@@ -98,23 +101,24 @@ export default function Footer() {
           <h4 className="text-white font-semibold text-xl mb-3">Follow Us</h4>
           <div className="text-[grey] flex flex-wrap justify-center gap-4 md:flex-col md:items-start">
             <div className="flex items-center gap-3 cursor-pointer hover:text-[white]">
-              <FaFacebookF className="text-2xl" />
+              {/* <FaFacebookF className="text-2xl" /> */}
+              <HugeiconsIcon icon={MetaIcon} size={24} />
               <span className="hidden lg:inline">Facebook</span>
             </div>
             <div className="flex items-center gap-3 cursor-pointer hover:text-[white]">
-              <FaInstagram className="text-2xl" />
+              <HugeiconsIcon icon={InstagramIcon} size={24} />
               <span className="hidden lg:inline">Instagram</span>
             </div>
             <div className="flex items-center gap-3 cursor-pointer hover:text-[white]">
-              <FaTwitter className="text-2xl" />
+              <HugeiconsIcon icon={NewTwitterIcon} size={24} />
               <span className="hidden lg:inline">Twitter</span>
             </div>
             <div className="flex items-center gap-3 cursor-pointer hover:text-[white]">
-              <FaYoutube className="text-2xl" />
+              <HugeiconsIcon icon={YoutubeIcon} size={24} />
               <span className="hidden lg:inline">YouTube</span>
             </div>
             <div className="flex items-center gap-3 cursor-pointer hover:text-[white]">
-              <FaDiscord className="text-2xl" />
+              <HugeiconsIcon icon={DiscordIcon} size={24} />
               <span className="hidden lg:inline">Discord</span>
             </div>
           </div>
@@ -122,7 +126,7 @@ export default function Footer() {
       </div>
 
       {/* Company Address Grid */}
-      {showAddresses &&(<div className="border-t border-neutral-800 px-4 pt-8 pb-12 text-gray-400 text-sm max-w-7xl mx-auto text-justify tracking-tight">
+      {showAddresses && (<div className="border-t border-neutral-800 px-4 pt-8 pb-12 text-gray-400 text-sm max-w-7xl mx-auto text-justify tracking-tight">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
             <p className="font-semibold text-white mb-1">Driffle UAB (Platform operator)</p>
@@ -146,7 +150,10 @@ export default function Footer() {
       {/* Legal Bottom Bar */}
       <div className="border-t border-neutral-800 px-4 py-6 text-gray-500 text-sm">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>© 2026 Keyzoo. All rights reserved.</p>
+          {/* <p>© 2026 Keyzoo. All rights reserved.</p> */}
+          <p className="flex items-center gap-2">
+            <HugeiconsIcon icon={CopyrightIcon} size={18} /> 2026 Keyzoo. All rights reserved.
+          </p>
           <div className="flex gap-4">
             <Link href="/policy/terms-and-conditions" className="hover:text-white transition">Terms & Conditions</Link>
             <Link href="/policy/privacy-policy" className="hover:text-white transition">Privacy Policy</Link>
