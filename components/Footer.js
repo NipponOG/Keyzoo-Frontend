@@ -56,8 +56,8 @@ export default function Footer() {
           </div>
 
           {/* Language Switcher */}
-          <div className="flex items-center gap-2 bg-[#2a2a2a] px-4 py-2 rounded-md w-max">
-            <Image src="/icons/globe_2.0.svg" alt="India Flag" width={20} height={14} />
+          <div className="flex items-center gap-1 bg-[#2a2a2a] px-2 py-2 rounded-md w-max">
+            <Image src="/icons/globe_2.0.svg" alt="Flag" width={20} height={14} />
             {/* <span>INR • English</span> */}
             <span><span className="font-bold uppercase">Global</span> • English</span>
             <ThemeToggle />
@@ -92,7 +92,7 @@ export default function Footer() {
           <p className='cursor-pointer text-[gray] hover:text-white'>System Status</p>
 
           <h4 className="text-white font-semibold text-xl mt-5 mb-3">Business</h4>
-          <p className='cursor-pointer text-[gray] hover:text-white'>Sell on Driffle</p>
+          <p className='cursor-pointer text-[gray] hover:text-white'>Sell with Keyzoo.</p>
           <p className='cursor-pointer text-[gray] hover:text-white'>Wholesale</p>
         </div>
 
